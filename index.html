@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Prompt Hub - Neon Edition (Pro)</title>
+    <!-- 统一应用名称 -->
+    <title>PromptHub - Neon Edition</title>
+    <!-- 添加与 Logo 完全一致的 SVG Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0%25' y1='100%25' x2='100%25' y2='0%25'><stop offset='0%25' stop-color='%23FF007A'/><stop offset='100%25' stop-color='%2300E5FF'/></linearGradient></defs><circle cx='12' cy='12' r='12' fill='url(%23g)'/><path stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none' d='M13 10V3L4 14h7v7l9-11h-7z' transform='translate(4,4) scale(0.66)'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -35,7 +38,6 @@
             .btn-ghost {
                 @apply px-4 py-1.5 text-xs font-bold text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors;
             }
-            /* 修复 4: 增加了 px-4 统一水平内边距 */
             .btn-panel {
                 @apply flex flex-1 items-center justify-center gap-1.5 px-4 py-2 bg-[#0B0B15] border border-white/10 text-white text-xs rounded-lg transition-colors;
             }
@@ -150,6 +152,7 @@
             <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-neonPink to-neonCyan flex items-center justify-center shadow-[0_0_8px_rgba(255,0,122,0.5)]">
                 <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
             </div>
+            <!-- 正确的品牌名展示 -->
             <h1 class="text-lg font-bold tracking-tight text-white hidden md:block">Prompt<span class="text-gradient">Hub</span></h1>
         </div>
 
@@ -179,19 +182,15 @@
         <div id="promptList" class="masonry pb-10"></div>
     </div>
 
-    <!-- ================= 核心表单 Modal: 添加 / 编辑 Prompt (左右分栏新布局) ================= -->
+    <!-- ================= 核心表单 Modal: 添加 / 编辑 Prompt (左右分栏布局) ================= -->
     <div id="addModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 overflow-y-auto px-4 py-6">
-        <!-- 修复 2 & 3: max-w-lg 升级为 max-w-3xl，宽度增加 -->
         <div class="modal-panel max-w-3xl w-full" id="addModalContent">
             
             <button onclick="closeAddModal()" class="btn-icon-rounded absolute top-4 right-4 z-10"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
 
             <!-- 动态 Header -->
-            <div class="flex items-center gap-3 mb-5" id="formModalHeader">
-                <!-- 由 JS 填充 -->
-            </div>
+            <div class="flex items-center gap-3 mb-5" id="formModalHeader"></div>
             
-            <!-- 修复 2 & 3: 左右分栏布局 -->
             <div class="flex flex-col md:flex-row gap-5 mb-5">
                 <!-- 左列: 分类、标题、图片 -->
                 <div class="w-full md:w-5/12 flex flex-col gap-4">
@@ -206,7 +205,6 @@
                     <div class="flex-grow flex flex-col">
                         <label class="form-label flex justify-between">
                             <span>视觉参考图</span>
-                            <!-- 修复 1: 提示直接粘贴 -->
                             <span class="text-gray-500 font-normal normal-case tracking-normal">支持直接 Ctrl+V 粘贴</span>
                         </label>
                         
@@ -235,7 +233,7 @@
                 </div>
             </div>
 
-            <button id="formSubmitBtn" onclick="savePrompt()" class="btn-primary mt-2">
+            <button id="formSubmitBtn" onclick="savePrompt()" class="btn-primary">
                 <!-- 由 JS 填充 -->
             </button>
         </div>
@@ -324,18 +322,20 @@
         const DEFAULT_CATEGORIES = ['通用', 'UI/UX 视觉', '代码开发', '文案编辑'];
         
         function getCategories() {
-            const saved = localStorage.getItem('promptHub_categories');
+            // 统一为大写开头的 PromptHub 键名
+            const saved = localStorage.getItem('PromptHub_Categories');
             return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
         }
 
         function saveCategories(cats) {
-            localStorage.setItem('promptHub_categories', JSON.stringify(cats));
+            localStorage.setItem('PromptHub_Categories', JSON.stringify(cats));
         }
 
         // ==========================================
         // 1. IndexedDB 存储核心
         // ==========================================
-        const DB_NAME = 'GeminiPromptHub_Neon';
+        // 彻底统一底层数据库名为 PromptHub_DB
+        const DB_NAME = 'PromptHub_DB';
         const DB_VERSION = 1;
         const STORE_NAME = 'prompts';
         let db = null;
@@ -492,7 +492,7 @@
             }, 200);
         }
 
-        // --- 设置弹窗逻辑 (修复 5：新增分类全量编辑与级联更新) ---
+        // --- 设置弹窗逻辑 ---
         function openSettingsModal() {
             renderSettingsCategories();
             const modal = document.getElementById('settingsModal');
@@ -522,9 +522,7 @@
             }
             list.innerHTML = cats.map((cat, index) => `
                 <div class="flex items-center justify-between p-2 hover:bg-white/5 rounded-lg group transition-colors">
-                    <!-- 显示模式 -->
                     <span class="text-xs text-gray-300 ml-1 truncate flex-grow" id="cat-text-${index}">${escapeHtml(cat)}</span>
-                    <!-- 编辑模式 (隐藏) -->
                     <input type="text" class="hidden form-input px-2 py-1 text-xs w-full mr-2" id="cat-input-${index}" value="${escapeHtml(cat)}" />
                     
                     <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" id="cat-actions-${index}">
@@ -536,7 +534,6 @@
                         </button>
                     </div>
 
-                    <!-- 保存/取消操作组 (隐藏) -->
                     <div class="hidden items-center gap-1 shrink-0" id="cat-save-actions-${index}">
                         <button onclick="saveEditCategory(${index}, '${escapeHtml(cat)}')" class="btn-icon-rounded p-1 hover:text-green-400 hover:bg-green-400/10">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -600,11 +597,10 @@
                 return;
             }
 
-            // 更新本地存储的分类名
             cats[index] = newCat;
             saveCategories(cats);
             
-            // 强大的级联更新：自动更新数据库中所有旧分类名的 Prompt
+            // 级联更新关联的 Prompt
             const records = await dbOps.getAll();
             let updatedCount = 0;
             for (let r of records) {
@@ -617,10 +613,10 @@
 
             renderSettingsCategories();
             if(activeCategory === oldCat) activeCategory = newCat;
-            showToast(`已重命名${updatedCount > 0 ? `，并级联更新 ${updatedCount} 条记录` : ''}`);
+            showToast(`重命名成功${updatedCount > 0 ? `，已更新 ${updatedCount} 条关联记录` : ''}`);
         }
 
-        // --- 确认弹窗逻辑 (复用：单条删除 / 全部清空) ---
+        // --- 确认弹窗逻辑 ---
         let confirmAction = null; 
 
         function openConfirmModal(id) {
@@ -712,7 +708,6 @@
         // ==========================================
         let currentImageBase64 = null;
 
-        // 统一提取图片压缩逻辑
         function processImageFile(file) {
             document.getElementById('uploadTip').innerText = "处理压缩中...";
             const reader = new FileReader();
@@ -735,16 +730,15 @@
             };
         }
 
-        // 绑定手动点击上传
         document.getElementById('imageInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (file) processImageFile(file);
         });
 
-        // 修复 1: 全局监听剪贴板粘贴 (仅弹窗开启时生效)
+        // 监听全局剪贴板粘贴 (支持直接粘贴图片)
         document.addEventListener('paste', (e) => {
             const addModal = document.getElementById('addModal');
-            if (addModal.classList.contains('opacity-0')) return; // 没开弹窗不处理
+            if (addModal.classList.contains('opacity-0')) return;
 
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
             for (let index in items) {
@@ -752,7 +746,7 @@
                 if (item.kind === 'file' && item.type.startsWith('image/')) {
                     const file = item.getAsFile();
                     processImageFile(file);
-                    showToast('检测到剪贴板图片');
+                    showToast('识别到剪贴板图片');
                     e.preventDefault();
                     break; 
                 }
