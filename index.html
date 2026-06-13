@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Prompt Hub - Neon Edition (Compact)</title>
-    <!-- 引入 Tailwind CDN -->
+    <title>Gemini Prompt Hub - Neon Edition (Pro)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -25,62 +24,42 @@
         }
     </script>
     
-    <!-- 🌟 全局组件规范提取区 -->
     <style type="text/tailwindcss">
         @layer components {
-            /* 1. 核心主操作按钮 (提交/保存) */
             .btn-primary {
                 @apply w-full bg-gradient-to-r from-neonPink to-neonCyan text-white text-sm font-bold py-2.5 rounded-lg hover:opacity-90 transition-opacity shadow-[0_0_15px_rgba(255,0,122,0.3)];
             }
-            
-            /* 2. 危险高危按钮 (删除/清空) */
             .btn-danger {
                 @apply px-4 py-1.5 text-xs font-bold text-white bg-danger hover:bg-red-600 shadow-[0_0_10px_rgba(255,51,102,0.4)] rounded-lg transition-colors;
             }
-            
-            /* 3. 幽灵/取消按钮 (次级操作) */
             .btn-ghost {
                 @apply px-4 py-1.5 text-xs font-bold text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors;
             }
-
-            /* 4. 面板功能按钮 (导入/导出/清空库) */
+            /* 修复 4: 增加了 px-4 统一水平内边距 */
             .btn-panel {
-                @apply flex flex-1 items-center justify-center gap-1.5 bg-[#0B0B15] border border-white/10 text-white text-xs py-2 rounded-lg transition-colors;
+                @apply flex flex-1 items-center justify-center gap-1.5 px-4 py-2 bg-[#0B0B15] border border-white/10 text-white text-xs rounded-lg transition-colors;
             }
-
-            /* 5. 纯图标圆形按钮 (关闭/设置图标) */
             .btn-icon-rounded {
-                @apply flex items-center justify-center p-1.5 text-gray-500 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-all;
+                @apply flex items-center justify-center p-1.5 text-gray-500 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-all shrink-0;
             }
-
-            /* 6. 卡片底部操作小按钮 (基类) */
             .btn-card-action {
                 @apply flex items-center justify-center text-gray-400 bg-white/5 border border-white/10 rounded-lg transition-all shrink-0;
             }
-
-            /* 7. 表单输入框 (Input / Textarea / Select) */
             .form-input {
                 @apply w-full bg-[#0B0B15] text-white text-xs border border-white/10 rounded-lg focus:outline-none focus:border-neonCyan focus:ring-1 focus:ring-neonCyan transition-all;
             }
-
-            /* 8. 表单标题标签 (Label / H4) */
             .form-label {
                 @apply block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1;
             }
-
-            /* 9. 弹窗面板容器 (Modal Panel) */
             .modal-panel {
                 @apply bg-darkCard border border-white/10 rounded-2xl p-5 sm:p-6 relative transform scale-95 transition-transform duration-200 m-auto shadow-2xl;
             }
-
-            /* 10. 霓虹分类徽章 (Badge) */
             .badge-neon {
                 @apply text-[10px] font-bold px-2.5 py-0.5 bg-white/5 text-neonCyan rounded-full border border-neonCyan/20;
             }
         }
     </style>
 
-    <!-- 基础样式覆盖 -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -200,60 +179,65 @@
         <div id="promptList" class="masonry pb-10"></div>
     </div>
 
-    <!-- ================= 核心表单 Modal: 添加 / 编辑 Prompt ================= -->
-    <div id="addModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 overflow-y-auto px-4">
-        <div class="modal-panel max-w-lg w-full" id="addModalContent">
+    <!-- ================= 核心表单 Modal: 添加 / 编辑 Prompt (左右分栏新布局) ================= -->
+    <div id="addModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 overflow-y-auto px-4 py-6">
+        <!-- 修复 2 & 3: max-w-lg 升级为 max-w-3xl，宽度增加 -->
+        <div class="modal-panel max-w-3xl w-full" id="addModalContent">
             
-            <button onclick="closeAddModal()" class="btn-icon-rounded absolute top-4 right-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            <button onclick="closeAddModal()" class="btn-icon-rounded absolute top-4 right-4 z-10"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
 
-            <!-- 动态 Header (复用于创建和编辑) -->
+            <!-- 动态 Header -->
             <div class="flex items-center gap-3 mb-5" id="formModalHeader">
                 <!-- 由 JS 填充 -->
             </div>
             
-            <div class="space-y-4">
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <div class="w-full sm:w-1/3">
+            <!-- 修复 2 & 3: 左右分栏布局 -->
+            <div class="flex flex-col md:flex-row gap-5 mb-5">
+                <!-- 左列: 分类、标题、图片 -->
+                <div class="w-full md:w-5/12 flex flex-col gap-4">
+                    <div>
                         <label class="form-label">分类</label>
-                        <select id="categorySelect" class="form-input px-3 py-2.5 cursor-pointer">
-                        </select>
+                        <select id="categorySelect" class="form-input px-3 py-2.5 cursor-pointer"></select>
                     </div>
-                    <div class="w-full sm:w-2/3">
+                    <div>
                         <label class="form-label">标题</label>
                         <input type="text" id="titleInput" placeholder="一句话描述用途" class="form-input px-3 py-2.5">
                     </div>
-                </div>
+                    <div class="flex-grow flex flex-col">
+                        <label class="form-label flex justify-between">
+                            <span>视觉参考图</span>
+                            <!-- 修复 1: 提示直接粘贴 -->
+                            <span class="text-gray-500 font-normal normal-case tracking-normal">支持直接 Ctrl+V 粘贴</span>
+                        </label>
+                        
+                        <div id="uploadZone" onclick="document.getElementById('imageInput').click()" 
+                            class="flex-grow border border-dashed border-white/15 rounded-lg p-4 text-center cursor-pointer bg-[#0B0B15]/50 hover:bg-[#0B0B15] hover:border-neonPink transition-all group flex flex-col items-center justify-center min-h-[120px]">
+                            <svg class="w-5 h-5 text-gray-600 group-hover:text-neonPink transition-colors mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            <span id="uploadTip" class="text-[11px] text-gray-500 font-medium group-hover:text-white transition-colors">点击或粘贴截图</span>
+                        </div>
+                        <input type="file" id="imageInput" accept="image/*" class="hidden">
 
-                <div>
-                    <label class="form-label">内容 <span class="text-neonPink">*</span></label>
-                    <textarea id="contentInput" placeholder="描述你希望 AI 做什么..." class="form-input px-3 py-2.5 min-h-[90px] resize-y leading-relaxed"></textarea>
-                </div>
-
-                <div>
-                    <label class="form-label">视觉参考图</label>
-                    <div id="uploadZone" onclick="document.getElementById('imageInput').click()" 
-                        class="border border-dashed border-white/15 rounded-lg p-4 text-center cursor-pointer bg-[#0B0B15]/50 hover:bg-[#0B0B15] hover:border-neonPink transition-all group flex flex-col items-center justify-center">
-                        <svg class="w-5 h-5 text-gray-600 group-hover:text-neonPink transition-colors mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span id="uploadTip" class="text-[11px] text-gray-500 font-medium group-hover:text-white transition-colors">点击上传图片附件</span>
-                    </div>
-                    <input type="file" id="imageInput" accept="image/*" class="hidden">
-
-                    <div id="previewWrapper" class="hidden relative mt-2 group inline-block">
-                        <img id="previewImg" src="" class="max-w-[160px] max-h-[100px] object-cover rounded-lg border border-white/10">
-                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center backdrop-blur-sm">
-                            <button onclick="clearSelectedImage()" class="btn-icon-rounded text-white bg-danger hover:bg-red-600 shadow-lg transform scale-90 group-hover:scale-100">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            </button>
+                        <div id="previewWrapper" class="hidden relative group h-full min-h-[120px]">
+                            <img id="previewImg" src="" class="w-full h-full object-cover rounded-lg border border-white/10">
+                            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center backdrop-blur-sm">
+                                <button onclick="clearSelectedImage()" class="btn-icon-rounded text-white bg-danger hover:bg-red-600 shadow-lg transform scale-90 group-hover:scale-100">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <button id="formSubmitBtn" onclick="savePrompt()" class="btn-primary mt-2">
-                    <!-- 由 JS 填充 -->
-                </button>
+                <!-- 右列: 内容文本区 -->
+                <div class="w-full md:w-7/12 flex flex-col">
+                    <label class="form-label">内容 <span class="text-neonPink">*</span></label>
+                    <textarea id="contentInput" placeholder="描述你希望 AI 做什么..." class="form-input px-3 py-2.5 flex-grow resize-none leading-relaxed min-h-[200px]"></textarea>
+                </div>
             </div>
+
+            <button id="formSubmitBtn" onclick="savePrompt()" class="btn-primary mt-2">
+                <!-- 由 JS 填充 -->
+            </button>
         </div>
     </div>
 
@@ -296,7 +280,7 @@
                         <input type="text" id="newCategoryInput" placeholder="输入新分类名称..." class="form-input px-3 py-2">
                         <button onclick="addCategory()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors border border-white/5 shrink-0">添加</button>
                     </div>
-                    <div class="bg-[#0B0B15] border border-white/5 rounded-lg p-1.5 max-h-36 overflow-y-auto no-scrollbar space-y-1" id="settingsCategoryList"></div>
+                    <div class="bg-[#0B0B15] border border-white/5 rounded-lg p-1.5 max-h-48 overflow-y-auto no-scrollbar space-y-1" id="settingsCategoryList"></div>
                 </div>
 
                 <!-- 高级操作区 -->
@@ -508,7 +492,7 @@
             }, 200);
         }
 
-        // --- 设置弹窗逻辑 ---
+        // --- 设置弹窗逻辑 (修复 5：新增分类全量编辑与级联更新) ---
         function openSettingsModal() {
             renderSettingsCategories();
             const modal = document.getElementById('settingsModal');
@@ -536,12 +520,31 @@
                 list.innerHTML = `<div class="text-center text-gray-500 text-xs py-3">暂无分类数据</div>`;
                 return;
             }
-            list.innerHTML = cats.map(cat => `
+            list.innerHTML = cats.map((cat, index) => `
                 <div class="flex items-center justify-between p-2 hover:bg-white/5 rounded-lg group transition-colors">
-                    <span class="text-xs text-gray-300 ml-1">${escapeHtml(cat)}</span>
-                    <button onclick="deleteCategory('${escapeHtml(cat)}')" class="btn-icon-rounded p-1 hover:text-danger hover:bg-danger/10 opacity-0 group-hover:opacity-100">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
+                    <!-- 显示模式 -->
+                    <span class="text-xs text-gray-300 ml-1 truncate flex-grow" id="cat-text-${index}">${escapeHtml(cat)}</span>
+                    <!-- 编辑模式 (隐藏) -->
+                    <input type="text" class="hidden form-input px-2 py-1 text-xs w-full mr-2" id="cat-input-${index}" value="${escapeHtml(cat)}" />
+                    
+                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" id="cat-actions-${index}">
+                        <button onclick="startEditCategory(${index})" class="btn-icon-rounded p-1 hover:text-neonCyan hover:bg-neonCyan/10">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </button>
+                        <button onclick="deleteCategory('${escapeHtml(cat)}')" class="btn-icon-rounded p-1 hover:text-danger hover:bg-danger/10">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- 保存/取消操作组 (隐藏) -->
+                    <div class="hidden items-center gap-1 shrink-0" id="cat-save-actions-${index}">
+                        <button onclick="saveEditCategory(${index}, '${escapeHtml(cat)}')" class="btn-icon-rounded p-1 hover:text-green-400 hover:bg-green-400/10">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </button>
+                        <button onclick="cancelEditCategory(${index})" class="btn-icon-rounded p-1 hover:text-gray-400 hover:bg-white/10">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -564,6 +567,57 @@
             cats = cats.filter(c => c !== cat);
             saveCategories(cats);
             renderSettingsCategories();
+        }
+
+        function startEditCategory(index) {
+            document.getElementById(`cat-text-${index}`).classList.add('hidden');
+            document.getElementById(`cat-actions-${index}`).classList.replace('flex', 'hidden');
+            const input = document.getElementById(`cat-input-${index}`);
+            input.classList.remove('hidden');
+            document.getElementById(`cat-save-actions-${index}`).classList.replace('hidden', 'flex');
+            input.focus();
+        }
+
+        function cancelEditCategory(index) {
+            document.getElementById(`cat-text-${index}`).classList.remove('hidden');
+            document.getElementById(`cat-actions-${index}`).classList.replace('hidden', 'flex');
+            document.getElementById(`cat-input-${index}`).classList.add('hidden');
+            document.getElementById(`cat-save-actions-${index}`).classList.replace('flex', 'hidden');
+        }
+
+        async function saveEditCategory(index, oldCat) {
+            const input = document.getElementById(`cat-input-${index}`);
+            const newCat = input.value.trim();
+            
+            if (!newCat || newCat === oldCat) {
+                cancelEditCategory(index);
+                return;
+            }
+            
+            let cats = getCategories();
+            if (cats.includes(newCat)) {
+                showToast('该分类名已存在', 'error');
+                return;
+            }
+
+            // 更新本地存储的分类名
+            cats[index] = newCat;
+            saveCategories(cats);
+            
+            // 强大的级联更新：自动更新数据库中所有旧分类名的 Prompt
+            const records = await dbOps.getAll();
+            let updatedCount = 0;
+            for (let r of records) {
+                if (r.category === oldCat || (!r.category && r.tag === oldCat)) {
+                    r.category = newCat;
+                    await dbOps.put(r);
+                    updatedCount++;
+                }
+            }
+
+            renderSettingsCategories();
+            if(activeCategory === oldCat) activeCategory = newCat;
+            showToast(`已重命名${updatedCount > 0 ? `，并级联更新 ${updatedCount} 条记录` : ''}`);
         }
 
         // --- 确认弹窗逻辑 (复用：单条删除 / 全部清空) ---
@@ -618,7 +672,6 @@
 
         // --- 剪贴板 ---
         async function copyPromptText(text) {
-            // 优先使用现代安全的 Clipboard API
             if (navigator.clipboard && window.isSecureContext) {
                 try {
                     await navigator.clipboard.writeText(text);
@@ -628,7 +681,6 @@
                     console.warn('Clipboard API fallback');
                 }
             }
-            // 兼容降级方案
             const textArea = document.createElement("textarea");
             textArea.value = text;
             textArea.style.position = "fixed"; textArea.style.left = "-9999px";
@@ -640,7 +692,6 @@
             document.body.removeChild(textArea);
         }
 
-        // 新增：根据 ID 直接从数据库拉取最原始数据，保证格式 100% 无损
         async function copyPromptTextById(id) {
             try {
                 const records = await dbOps.getAll();
@@ -657,13 +708,12 @@
         }
 
         // ==========================================
-        // 3. 核心业务逻辑 (图片/提交/导入导出)
+        // 3. 核心业务逻辑 (图片处理/粘贴/提交/导入导出)
         // ==========================================
         let currentImageBase64 = null;
 
-        document.getElementById('imageInput').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+        // 统一提取图片压缩逻辑
+        function processImageFile(file) {
             document.getElementById('uploadTip').innerText = "处理压缩中...";
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -680,9 +730,33 @@
                     document.getElementById('previewImg').src = currentImageBase64;
                     document.getElementById('uploadZone').classList.add('hidden');
                     document.getElementById('previewWrapper').classList.remove('hidden');
-                    document.getElementById('uploadTip').innerText = "点击上传图片附件";
+                    document.getElementById('uploadTip').innerText = "点击或粘贴截图";
                 };
             };
+        }
+
+        // 绑定手动点击上传
+        document.getElementById('imageInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) processImageFile(file);
+        });
+
+        // 修复 1: 全局监听剪贴板粘贴 (仅弹窗开启时生效)
+        document.addEventListener('paste', (e) => {
+            const addModal = document.getElementById('addModal');
+            if (addModal.classList.contains('opacity-0')) return; // 没开弹窗不处理
+
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let index in items) {
+                const item = items[index];
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    const file = item.getAsFile();
+                    processImageFile(file);
+                    showToast('检测到剪贴板图片');
+                    e.preventDefault();
+                    break; 
+                }
+            }
         });
 
         function clearSelectedImage() {
@@ -861,7 +935,6 @@
                                 
                                 ${displayTitle !== '未命名片段' ? `<h4 class="text-xs font-bold text-white mb-2 tracking-wide truncate">${escapeHtml(displayTitle)}</h4>` : ''}
                                 
-                                <!-- 修复: 1. 加入 whitespace-pre-wrap 保留换行和空格格式 2. 标签与内容同行避免多余缩进 -->
                                 <div class="scroll-mask whitespace-pre-wrap text-xs text-gray-300 font-mono leading-relaxed bg-[#0B0B15] p-3 rounded-lg border border-white/5 max-h-32 overflow-y-auto no-scrollbar mb-3 relative flex-grow" id="content-${item.id}">${escapeHtml(item.content)}</div>
                                 
                                 <div class="flex items-center gap-1.5 mt-auto pt-2 border-t border-white/5">
