@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Prompt Hub - Neon Edition (Compact)</title>
+    <!-- 引入 Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0B0B15',
+                        darkCard: '#151522',
+                        neonPink: '#FF007A',
+                        neonCyan: '#00E5FF',
+                        danger: '#FF3366',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- 🌟 全局组件规范提取区 -->
+    <style type="text/tailwindcss">
+        @layer components {
+            /* 1. 核心主操作按钮 (提交/保存) */
+            .btn-primary {
+                @apply w-full bg-gradient-to-r from-neonPink to-neonCyan text-white text-sm font-bold py-2.5 rounded-lg hover:opacity-90 transition-opacity shadow-[0_0_15px_rgba(255,0,122,0.3)];
+            }
+            
+            /* 2. 危险高危按钮 (删除/清空) */
+            .btn-danger {
+                @apply px-4 py-1.5 text-xs font-bold text-white bg-danger hover:bg-red-600 shadow-[0_0_10px_rgba(255,51,102,0.4)] rounded-lg transition-colors;
+            }
+            
+            /* 3. 幽灵/取消按钮 (次级操作) */
+            .btn-ghost {
+                @apply px-4 py-1.5 text-xs font-bold text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors;
+            }
+
+            /* 4. 面板功能按钮 (导入/导出/清空库) */
+            .btn-panel {
+                @apply flex flex-1 items-center justify-center gap-1.5 bg-[#0B0B15] border border-white/10 text-white text-xs py-2 rounded-lg transition-colors;
+            }
+
+            /* 5. 纯图标圆形按钮 (关闭/设置图标) */
+            .btn-icon-rounded {
+                @apply flex items-center justify-center p-1.5 text-gray-500 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-all;
+            }
+
+            /* 6. 卡片底部操作小按钮 (基类) */
+            .btn-card-action {
+                @apply flex items-center justify-center text-gray-400 bg-white/5 border border-white/10 rounded-lg transition-all shrink-0;
+            }
+
+            /* 7. 表单输入框 (Input / Textarea / Select) */
+            .form-input {
+                @apply w-full bg-[#0B0B15] text-white text-xs border border-white/10 rounded-lg focus:outline-none focus:border-neonCyan focus:ring-1 focus:ring-neonCyan transition-all;
+            }
+
+            /* 8. 表单标题标签 (Label / H4) */
+            .form-label {
+                @apply block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1;
+            }
+
+            /* 9. 弹窗面板容器 (Modal Panel) */
+            .modal-panel {
+                @apply bg-darkCard border border-white/10 rounded-2xl p-5 sm:p-6 relative transform scale-95 transition-transform duration-200 m-auto shadow-2xl;
+            }
+
+            /* 10. 霓虹分类徽章 (Badge) */
+            .badge-neon {
+                @apply text-[10px] font-bold px-2.5 py-0.5 bg-white/5 text-neonCyan rounded-full border border-neonCyan/20;
+            }
+        }
+    </style>
+
+    <!-- 基础样式覆盖 -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        body {
+            background-color: #0B0B15;
+            color: #ffffff;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(255, 0, 122, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(0, 229, 255, 0.15) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .masonry { column-count: 1; column-gap: 1rem; }
+        @media (min-width: 640px) { .masonry { column-count: 2; } }
+        @media (min-width: 1024px) { .masonry { column-count: 3; } }
+        @media (min-width: 1280px) { .masonry { column-count: 4; } }
+        @media (min-width: 1536px) { .masonry { column-count: 5; } }
+        
+        .masonry-item { break-inside: avoid-column; margin-bottom: 1rem; display: inline-block; width: 100%; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .scroll-mask {
+            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+        }
+
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(135deg, #151522, #151522) padding-box,
+                        linear-gradient(135deg, rgba(255,0,122,0.5), rgba(0,229,255,0.5)) border-box;
+            border: 1px solid transparent;
+        }
+        .gradient-border:hover {
+            background: linear-gradient(135deg, #1c1c2e, #1c1c2e) padding-box,
+                        linear-gradient(135deg, #FF007A, #00E5FF) border-box;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.15);
+        }
+
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #FF007A, #00E5FF);
+        }
+
+        .btn-outline-gradient {
+            position: relative;
+            background: transparent;
+            z-index: 1;
+        }
+        .btn-outline-gradient::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 9999px;
+            padding: 2px;
+            background: linear-gradient(to right, #FF007A, #00E5FF);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        .btn-outline-gradient:hover {
+            background: linear-gradient(to right, rgba(255,0,122,0.1), rgba(0,229,255,0.1));
+            box-shadow: 0 0 12px rgba(255, 0, 122, 0.3);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.2s ease-out forwards; }
+        
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='gray' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.8rem center;
+            background-size: 1em;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen">
+
+    <header class="fixed top-0 inset-x-0 h-14 backdrop-blur-xl bg-darkBg/80 border-b border-white/5 z-40 flex items-center justify-between px-4 md:px-6 shadow-sm gap-3">
+        <div class="flex items-center space-x-2 shrink-0">
+            <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-neonPink to-neonCyan flex items-center justify-center shadow-[0_0_8px_rgba(255,0,122,0.5)]">
+                <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            </div>
+            <h1 class="text-lg font-bold tracking-tight text-white hidden md:block">Prompt<span class="text-gradient">Hub</span></h1>
+        </div>
+
+        <div class="flex-1 max-w-lg relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" id="searchInput" placeholder="搜索标题或内容..." 
+                class="form-input !bg-[#151522]/80 backdrop-blur-sm pl-8 pr-3 py-1.5 placeholder-gray-600">
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+            <button onclick="openSettingsModal()" class="btn-icon-rounded" title="设置与管理">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            </button>
+            <button onclick="openAddModal()" class="btn-outline-gradient text-white px-4 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap">
+                + 新建
+            </button>
+        </div>
+    </header>
+
+    <div class="max-w-[1500px] mx-auto pt-20 px-4 md:px-6 space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/5 pb-3">
+            <div id="categoryTabs" class="flex gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto pb-1"></div>
+            <div class="text-xs text-gray-500 whitespace-nowrap shrink-0">
+                共 <span id="statTotal" class="text-neonCyan font-bold mx-0.5">0</span> 条
+            </div>
+        </div>
+        <div id="promptList" class="masonry pb-10"></div>
+    </div>
+
+    <!-- ================= 核心表单 Modal: 添加 / 编辑 Prompt ================= -->
+    <div id="addModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 overflow-y-auto px-4">
+        <div class="modal-panel max-w-lg w-full" id="addModalContent">
+            
+            <button onclick="closeAddModal()" class="btn-icon-rounded absolute top-4 right-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+
+            <!-- 动态 Header (复用于创建和编辑) -->
+            <div class="flex items-center gap-3 mb-5" id="formModalHeader">
+                <!-- 由 JS 填充 -->
+            </div>
+            
+            <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="w-full sm:w-1/3">
+                        <label class="form-label">分类</label>
+                        <select id="categorySelect" class="form-input px-3 py-2.5 cursor-pointer">
+                        </select>
+                    </div>
+                    <div class="w-full sm:w-2/3">
+                        <label class="form-label">标题</label>
+                        <input type="text" id="titleInput" placeholder="一句话描述用途" class="form-input px-3 py-2.5">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label">内容 <span class="text-neonPink">*</span></label>
+                    <textarea id="contentInput" placeholder="描述你希望 AI 做什么..." class="form-input px-3 py-2.5 min-h-[90px] resize-y leading-relaxed"></textarea>
+                </div>
+
+                <div>
+                    <label class="form-label">视觉参考图</label>
+                    <div id="uploadZone" onclick="document.getElementById('imageInput').click()" 
+                        class="border border-dashed border-white/15 rounded-lg p-4 text-center cursor-pointer bg-[#0B0B15]/50 hover:bg-[#0B0B15] hover:border-neonPink transition-all group flex flex-col items-center justify-center">
+                        <svg class="w-5 h-5 text-gray-600 group-hover:text-neonPink transition-colors mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span id="uploadTip" class="text-[11px] text-gray-500 font-medium group-hover:text-white transition-colors">点击上传图片附件</span>
+                    </div>
+                    <input type="file" id="imageInput" accept="image/*" class="hidden">
+
+                    <div id="previewWrapper" class="hidden relative mt-2 group inline-block">
+                        <img id="previewImg" src="" class="max-w-[160px] max-h-[100px] object-cover rounded-lg border border-white/10">
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center backdrop-blur-sm">
+                            <button onclick="clearSelectedImage()" class="btn-icon-rounded text-white bg-danger hover:bg-red-600 shadow-lg transform scale-90 group-hover:scale-100">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="formSubmitBtn" onclick="savePrompt()" class="btn-primary mt-2">
+                    <!-- 由 JS 填充 -->
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 紧凑版 Modal: 2. 全局设置 ================= -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4 overflow-y-auto">
+        <div class="modal-panel max-w-md w-full" id="settingsModalContent">
+            
+            <button onclick="closeSettingsModal()" class="btn-icon-rounded absolute top-4 right-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-2 bg-neonPink/10 rounded-lg border border-neonPink/20"><svg class="w-5 h-5 text-neonPink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>
+                <h3 class="text-lg font-bold text-white tracking-tight">Global <span class="text-neonPink">Settings</span></h3>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- 数据备份管理 -->
+                <div>
+                    <h4 class="form-label">数据备份管理</h4>
+                    <div class="flex gap-2">
+                        <input type="file" id="importInput" accept=".json" class="hidden">
+                        <button onclick="document.getElementById('importInput').click()" class="btn-panel hover:border-neonCyan">
+                            <svg class="w-3.5 h-3.5 text-neonCyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            导入 JSON
+                        </button>
+                        <button onclick="exportData()" class="btn-panel hover:border-neonPink">
+                            <svg class="w-3.5 h-3.5 text-neonPink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            导出备份
+                        </button>
+                    </div>
+                    <button onclick="insertMockData()" class="btn-panel mt-2 bg-transparent border-dashed hover:bg-white/5 hover:text-white text-gray-400 border-white/10">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        注入样式演示数据 (Mock)
+                    </button>
+                </div>
+
+                <!-- 分类管理 -->
+                <div>
+                    <h4 class="form-label">自定义分类标签</h4>
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" id="newCategoryInput" placeholder="输入新分类名称..." class="form-input px-3 py-2">
+                        <button onclick="addCategory()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors border border-white/5 shrink-0">添加</button>
+                    </div>
+                    <div class="bg-[#0B0B15] border border-white/5 rounded-lg p-1.5 max-h-36 overflow-y-auto no-scrollbar space-y-1" id="settingsCategoryList"></div>
+                </div>
+
+                <!-- 高级操作区 -->
+                <div class="pt-2 border-t border-white/5">
+                    <button onclick="openClearAllModal()" class="btn-panel bg-danger/10 hover:bg-danger/20 text-danger border-danger/20 hover:border-danger/50 font-bold tracking-wide">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        一键清空本地库
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 紧凑版 Modal: 3. 确认删除 ================= -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4">
+        <div class="modal-panel max-w-xs w-full" id="confirmModalContent">
+            <div class="flex items-center gap-2 mb-3">
+                <div class="p-1.5 bg-danger/10 rounded border border-danger/20">
+                    <svg class="w-4 h-4 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="text-base font-bold text-white tracking-tight" id="confirmTitle">Confirm <span class="text-danger">Delete</span></h3>
+            </div>
+            <p class="text-xs text-gray-400 mb-5 ml-1" id="confirmDesc">此操作将从数据库中永久销毁该记录，确认继续？</p>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeConfirmModal()" class="btn-ghost">取消</button>
+                <button id="confirmBtn" class="btn-danger">永久销毁</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 bg-darkCard border border-white/10 text-white px-4 py-2 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] text-xs font-medium opacity-0 pointer-events-none transition-opacity z-[70] flex items-center gap-1.5">
+        <span id="toastIcon"></span>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // ==========================================
+        // 0. 分类管理系统 (基于 localStorage)
+        // ==========================================
+        const DEFAULT_CATEGORIES = ['通用', 'UI/UX 视觉', '代码开发', '文案编辑'];
+        
+        function getCategories() {
+            const saved = localStorage.getItem('promptHub_categories');
+            return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+        }
+
+        function saveCategories(cats) {
+            localStorage.setItem('promptHub_categories', JSON.stringify(cats));
+        }
+
+        // ==========================================
+        // 1. IndexedDB 存储核心
+        // ==========================================
+        const DB_NAME = 'GeminiPromptHub_Neon';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'prompts';
+        let db = null;
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onupgradeneeded = (e) => {
+                    const database = e.target.result;
+                    if (!database.objectStoreNames.contains(STORE_NAME)) {
+                        database.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                    }
+                };
+                request.onsuccess = (e) => { db = e.target.result; resolve(db); };
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        const dbOps = {
+            add: (data) => new Promise((resolve, reject) => {
+                const tx = db.transaction([STORE_NAME], 'readwrite');
+                tx.objectStore(STORE_NAME).add(data).onsuccess = resolve;
+                tx.onerror = (e) => reject(e.target.error);
+            }),
+            put: (data) => new Promise((resolve, reject) => {
+                const tx = db.transaction([STORE_NAME], 'readwrite');
+                tx.objectStore(STORE_NAME).put(data).onsuccess = resolve;
+                tx.onerror = (e) => reject(e.target.error);
+            }),
+            getAll: () => new Promise((resolve, reject) => {
+                const tx = db.transaction([STORE_NAME], 'readonly');
+                tx.objectStore(STORE_NAME).getAll().onsuccess = (e) => resolve(e.target.result);
+                tx.onerror = (e) => reject(e.target.error);
+            }),
+            delete: (id) => new Promise((resolve, reject) => {
+                const tx = db.transaction([STORE_NAME], 'readwrite');
+                tx.objectStore(STORE_NAME).delete(id).onsuccess = resolve;
+                tx.onerror = (e) => reject(e.target.error);
+            }),
+            clearAll: () => new Promise((resolve, reject) => {
+                const tx = db.transaction([STORE_NAME], 'readwrite');
+                tx.objectStore(STORE_NAME).clear().onsuccess = resolve;
+                tx.onerror = (e) => reject(e.target.error);
+            })
+        };
+
+        // ==========================================
+        // 2. 交互逻辑 (Toast, Modals, Mock Data)
+        // ==========================================
+        let toastTimeout;
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').innerText = message;
+            document.getElementById('toastIcon').innerHTML = type === 'success' 
+                ? '<svg class="w-3.5 h-3.5 text-neonCyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>'
+                : '<svg class="w-3.5 h-3.5 text-neonPink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('animate-fade-in');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+                toast.classList.remove('animate-fade-in');
+            }, 2000);
+        }
+
+        async function insertMockData() {
+            const mockImgBase64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNDUwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNGRjAwN0EiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMwMEU1RkYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PGNpcmNsZSBjeD0iNDAwIiBjeT0iMjI1IiByPSI4MCIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuMSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIzNiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VmlzdWFsIFJlZmVyZW5jZTwvdGV4dD48L3N2Zz4=";
+            const mocks = [
+                { category: '通用', title: 'Midjourney 极简 Logo', content: 'Logo design, a futuristic letter "P" combined with an infinity symbol, minimalistic, neon cyan and hot pink gradient, dark background, vector art, high resolution, flat design --ar 1:1 --v 6.0', image: mockImgBase64, timestamp: Date.now() },
+                { category: '代码开发', title: 'React 瀑布流组件', content: '作为一名前端专家，请帮我用 React 和 TailwindCSS 实现一个纯 CSS 的瀑布流（Masonry）组件。\n\n要求：\n1. 不使用第三方库\n2. 使用 CSS column-count 实现自适应\n3. 卡片内包含图片和不确定长度的文字\n4. 重点解决卡片被截断（break-inside）的兼容性问题。', image: null, timestamp: Date.now() - 1000 },
+                { category: '文案编辑', title: 'NFT 项目发售推文', content: '帮我为即将发售的 "Neon Ape" NFT 系列写一条 Twitter 宣传文案。\n要求：语气要极具号召力和未来感，强调 "Free Mint"（免费铸造），包含 Call to action，加上相关标签（#NFT #Web3）。', image: null, timestamp: Date.now() - 2000 },
+                { category: 'UI/UX 视觉', title: '赛博朋克控制台', content: '请生成一个赛博朋克风格的后台管理系统界面，主色调为深色，带有霓虹粉和青色的点缀。需要包含侧边栏导航、顶部发光卡片面板和一个带有炫酷数据可视化的折线图。整体需要有玻璃拟态（Glassmorphism）质感。', image: null, timestamp: Date.now() - 3000 }
+            ];
+            for (const m of mocks) await dbOps.add(m);
+            showToast('✅ 演示数据已注入成功！');
+            closeSettingsModal();
+            loadAndRenderList();
+        }
+
+        // --- 核心表单弹窗 (支持 新建 / 编辑) ---
+        let currentEditId = null;
+
+        function openAddModal() {
+            currentEditId = null; 
+            
+            document.getElementById('formModalHeader').innerHTML = `
+                <div class="p-2 bg-neonCyan/10 rounded-lg border border-neonCyan/20">
+                    <svg class="w-5 h-5 text-neonCyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold text-white tracking-tight">Create <span class="text-neonCyan">Prompt</span></h3>
+            `;
+            document.getElementById('formSubmitBtn').innerText = "保存至本地库";
+
+            const select = document.getElementById('categorySelect');
+            const cats = getCategories();
+            select.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            document.getElementById('titleInput').value = '';
+            document.getElementById('contentInput').value = '';
+            clearSelectedImage();
+
+            showFormModal();
+        }
+
+        async function openEditModal(id) {
+            currentEditId = id; 
+            
+            document.getElementById('formModalHeader').innerHTML = `
+                <div class="p-2 bg-neonPink/10 rounded-lg border border-neonPink/20">
+                    <svg class="w-5 h-5 text-neonPink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold text-white tracking-tight">Edit <span class="text-neonPink">Prompt</span></h3>
+            `;
+            document.getElementById('formSubmitBtn').innerText = "保存修改";
+
+            const select = document.getElementById('categorySelect');
+            const cats = getCategories();
+            select.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+
+            const records = await dbOps.getAll();
+            const item = records.find(r => r.id === id);
+            if (!item) return showToast('数据读取失败', 'error');
+
+            document.getElementById('categorySelect').value = item.category || '通用';
+            document.getElementById('titleInput').value = item.title || item.tag || '';
+            document.getElementById('contentInput').value = item.content || '';
+
+            if (item.image) {
+                currentImageBase64 = item.image;
+                document.getElementById('previewImg').src = item.image;
+                document.getElementById('uploadZone').classList.add('hidden');
+                document.getElementById('previewWrapper').classList.remove('hidden');
+            } else {
+                clearSelectedImage();
+            }
+
+            showFormModal();
+        }
+
+        function showFormModal() {
+            const modal = document.getElementById('addModal');
+            const content = document.getElementById('addModalContent');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => content.classList.remove('scale-95'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAddModal() {
+            const modal = document.getElementById('addModal');
+            const content = document.getElementById('addModalContent');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                document.body.style.overflow = '';
+            }, 200);
+        }
+
+        // --- 设置弹窗逻辑 ---
+        function openSettingsModal() {
+            renderSettingsCategories();
+            const modal = document.getElementById('settingsModal');
+            const content = document.getElementById('settingsModalContent');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => content.classList.remove('scale-95'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            const content = document.getElementById('settingsModalContent');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                document.body.style.overflow = '';
+            }, 200);
+            loadAndRenderList();
+        }
+
+        function renderSettingsCategories() {
+            const cats = getCategories();
+            const list = document.getElementById('settingsCategoryList');
+            if (cats.length === 0) {
+                list.innerHTML = `<div class="text-center text-gray-500 text-xs py-3">暂无分类数据</div>`;
+                return;
+            }
+            list.innerHTML = cats.map(cat => `
+                <div class="flex items-center justify-between p-2 hover:bg-white/5 rounded-lg group transition-colors">
+                    <span class="text-xs text-gray-300 ml-1">${escapeHtml(cat)}</span>
+                    <button onclick="deleteCategory('${escapeHtml(cat)}')" class="btn-icon-rounded p-1 hover:text-danger hover:bg-danger/10 opacity-0 group-hover:opacity-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addCategory() {
+            const input = document.getElementById('newCategoryInput');
+            const val = input.value.trim();
+            if (!val) return;
+            const cats = getCategories();
+            if (cats.includes(val)) return showToast('该分类已存在', 'error');
+            cats.push(val);
+            saveCategories(cats);
+            input.value = '';
+            renderSettingsCategories();
+            showToast('分类添加成功');
+        }
+
+        function deleteCategory(cat) {
+            let cats = getCategories();
+            cats = cats.filter(c => c !== cat);
+            saveCategories(cats);
+            renderSettingsCategories();
+        }
+
+        // --- 确认弹窗逻辑 (复用：单条删除 / 全部清空) ---
+        let confirmAction = null; 
+
+        function openConfirmModal(id) {
+            document.getElementById('confirmTitle').innerHTML = 'Confirm <span class="text-danger">Delete</span>';
+            document.getElementById('confirmDesc').innerText = '此操作将从数据库中永久销毁该记录，确认继续？';
+            
+            confirmAction = async () => {
+                await dbOps.delete(id);
+                showToast('数据已抹除');
+                loadAndRenderList();
+            };
+            showConfirmModal();
+        }
+
+        function openClearAllModal() {
+            closeSettingsModal(); 
+            document.getElementById('confirmTitle').innerHTML = 'Clear <span class="text-danger">All Data</span>';
+            document.getElementById('confirmDesc').innerText = '警告：此操作将清空本地所有提示词数据且不可恢复！是否继续？';
+            
+            confirmAction = async () => {
+                await dbOps.clearAll();
+                showToast('本地库已完全清空');
+                loadAndRenderList();
+            };
+            setTimeout(showConfirmModal, 250); 
+        }
+
+        function showConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            const content = document.getElementById('confirmModalContent');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => content.classList.remove('scale-95'), 10);
+        }
+
+        function closeConfirmModal() {
+            confirmAction = null;
+            const modal = document.getElementById('confirmModal');
+            const content = document.getElementById('confirmModalContent');
+            content.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('opacity-0', 'pointer-events-none'), 150);
+        }
+
+        document.getElementById('confirmBtn').addEventListener('click', async () => {
+            if (confirmAction) {
+                await confirmAction();
+                closeConfirmModal();
+            }
+        });
+
+        // --- 剪贴板 ---
+        function copyPromptText(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed"; textArea.style.left = "-9999px";
+            document.body.appendChild(textArea); textArea.select();
+            try {
+                if(document.execCommand('copy')) showToast('✨ 已复制！');
+                else showToast('复制失败', 'error');
+            } catch (err) { showToast('复制异常', 'error'); }
+            document.body.removeChild(textArea);
+        }
+
+        // ==========================================
+        // 3. 核心业务逻辑 (图片/提交/导入导出)
+        // ==========================================
+        let currentImageBase64 = null;
+
+        document.getElementById('imageInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('uploadTip').innerText = "处理压缩中...";
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image(); img.src = event.target.result;
+                img.onload = () => {
+                    const maxWidth = 1024; let { width, height } = img;
+                    if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width; canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    currentImageBase64 = canvas.toDataURL('image/webp', 0.8);
+                    
+                    document.getElementById('previewImg').src = currentImageBase64;
+                    document.getElementById('uploadZone').classList.add('hidden');
+                    document.getElementById('previewWrapper').classList.remove('hidden');
+                    document.getElementById('uploadTip').innerText = "点击上传图片附件";
+                };
+            };
+        });
+
+        function clearSelectedImage() {
+            document.getElementById('imageInput').value = '';
+            currentImageBase64 = null;
+            document.getElementById('previewWrapper').classList.add('hidden');
+            document.getElementById('uploadZone').classList.remove('hidden');
+        }
+
+        async function savePrompt() {
+            const category = document.getElementById('categorySelect').value;
+            const title = document.getElementById('titleInput').value.trim();
+            const content = document.getElementById('contentInput').value.trim();
+
+            if (!content) return showToast('Prompt 内容为必填', 'error');
+
+            const payload = { category, title, content, image: currentImageBase64, timestamp: Date.now() };
+
+            if (currentEditId) {
+                payload.id = currentEditId; 
+                await dbOps.put(payload);
+                showToast('修改已保存');
+            } else {
+                await dbOps.add(payload);
+                showToast('已保存至本地库');
+            }
+            
+            closeAddModal();
+            loadAndRenderList();
+        }
+
+        document.getElementById('searchInput').addEventListener('input', () => loadAndRenderList());
+
+        async function exportData() {
+            try {
+                const records = await dbOps.getAll();
+                if (records.length === 0) return showToast('暂无数据', 'error');
+                
+                const dataStr = JSON.stringify(records);
+                const blob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a'); a.href = url;
+                a.download = `PromptHub_Backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+                showToast('备份已导出');
+            } catch (err) { showToast('导出中止', 'error'); }
+        }
+
+        document.getElementById('importInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (!Array.isArray(data)) throw new Error("Format error");
+                    
+                    let importedCount = 0;
+                    for (const item of data) {
+                        if (item.id) delete item.id;
+                        if (item.content) {
+                            if (!item.timestamp) item.timestamp = Date.now();
+                            await dbOps.add(item);
+                            importedCount++;
+                        }
+                    }
+                    if(importedCount > 0) {
+                        showToast(`导入成功 (追加 ${importedCount} 条记录)`);
+                    } else {
+                        showToast('文件中未发现有效数据', 'error');
+                    }
+                    document.getElementById('importInput').value = ''; 
+                    loadAndRenderList();
+                    closeSettingsModal(); 
+                } catch (err) {
+                    showToast('文件解析失败', 'error');
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // ==========================================
+        // 4. 瀑布流渲染与搜索过滤
+        // ==========================================
+        const escapeHtml = (s) => String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+
+        let activeCategory = 'All';
+
+        function renderCategoryTabs() {
+            const tabsContainer = document.getElementById('categoryTabs');
+            const userCats = getCategories();
+            const uniqueTags = ['All', ...userCats];
+            
+            tabsContainer.innerHTML = uniqueTags.map(tag => {
+                const isActive = tag === activeCategory;
+                const label = tag === 'All' ? '全部' : escapeHtml(tag);
+                const activeClass = isActive 
+                    ? 'bg-neonCyan/10 text-neonCyan border-neonCyan/50 shadow-[0_0_8px_rgba(0,229,255,0.2)]' 
+                    : 'bg-transparent text-gray-400 border-white/10 hover:border-white/30 hover:text-white';
+                
+                const safeTag = tag.replace(/'/g, "\\'"); 
+                return `<button onclick="setActiveCategory('${safeTag}')" class="px-3 py-1 rounded-full text-[11px] font-medium border transition-all whitespace-nowrap ${activeClass}">${label}</button>`;
+            }).join('');
+        }
+
+        function setActiveCategory(category) {
+            activeCategory = category;
+            loadAndRenderList();
+        }
+
+        async function loadAndRenderList() {
+            const listContainer = document.getElementById('promptList');
+            const statTotal = document.getElementById('statTotal');
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            try {
+                let records = await dbOps.getAll();
+                records.sort((a, b) => b.timestamp - a.timestamp);
+                
+                renderCategoryTabs();
+
+                if (activeCategory !== 'All') {
+                    records = records.filter(item => {
+                        const itemCat = item.category || item.tag || '通用';
+                        return itemCat === activeCategory;
+                    });
+                }
+                
+                if (searchQuery) {
+                    records = records.filter(item => 
+                        ((item.category || '').toLowerCase().includes(searchQuery)) ||
+                        ((item.title || item.tag || '').toLowerCase().includes(searchQuery)) ||
+                        ((item.content || '').toLowerCase().includes(searchQuery))
+                    );
+                }
+
+                statTotal.innerText = records.length;
+
+                if (records.length === 0) {
+                    listContainer.innerHTML = `
+                        <div style="column-span: all;" class="w-full flex justify-center py-20">
+                            <span class="text-gray-500 text-xs tracking-wide text-center">
+                                ${searchQuery || activeCategory !== 'All' ? '未找到匹配记录，尝试更换检索词。' : '库中暂无数据，请新建或在设置中注入演示数据。'}
+                            </span>
+                        </div>`;
+                    return;
+                }
+
+                listContainer.innerHTML = records.map(item => {
+                    const displayTitle = item.title || item.tag || '未命名片段';
+                    const displayCat = item.category || '通用';
+
+                    return `
+                    <div class="masonry-item gradient-border rounded-[20px] overflow-hidden group">
+                        <div class="bg-darkCard rounded-[19px] h-full flex flex-col">
+                            ${item.image ? `
+                                <div class="relative w-full pt-[50%] overflow-hidden rounded-t-[19px] bg-[#0B0B15]">
+                                    <img src="${item.image}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-pointer" onclick="window.open('${item.image}')">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-darkCard via-transparent to-transparent pointer-events-none"></div>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="p-4 flex-grow flex flex-col">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="badge-neon">
+                                        ${escapeHtml(displayCat)}
+                                    </span>
+                                    <span class="text-[9px] text-gray-500 font-mono">
+                                        ${new Date(item.timestamp).toLocaleDateString()}
+                                    </span>
+                                </div>
+                                
+                                ${displayTitle !== '未命名片段' ? `<h4 class="text-xs font-bold text-white mb-2 tracking-wide truncate">${escapeHtml(displayTitle)}</h4>` : ''}
+                                
+                                <div class="scroll-mask text-xs text-gray-300 font-mono leading-relaxed bg-[#0B0B15] p-3 rounded-lg border border-white/5 max-h-32 overflow-y-auto no-scrollbar mb-3 relative flex-grow" id="content-${item.id}">
+                                    ${escapeHtml(item.content)}
+                                </div>
+                                
+                                <div class="flex items-center gap-1.5 mt-auto pt-2 border-t border-white/5">
+                                    <button onclick="copyPromptText(document.getElementById('content-${item.id}').innerText)" 
+                                        class="flex-1 btn-card-action hover:text-white hover:bg-white/10 text-[11px] font-bold py-2 gap-1.5 text-white" title="复制">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                        Copy
+                                    </button>
+                                    <button onclick="openEditModal(${item.id})" 
+                                        class="w-8 h-8 btn-card-action hover:text-white hover:bg-neonCyan/20 hover:border-neonCyan/50 shrink-0" title="编辑">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    </button>
+                                    <button onclick="openConfirmModal(${item.id})" 
+                                        class="w-8 h-8 btn-card-action hover:text-white hover:bg-danger/20 hover:border-danger/50 shrink-0" title="删除">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error("Render error:", err);
+                showToast("核心数据读取异常", "error");
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await initDB();
+                loadAndRenderList();
+            } catch (err) {
+                showToast("当前环境暂不支持 IndexedDB", "error");
+            }
+        });
+    </script>
+</body>
+</html>
