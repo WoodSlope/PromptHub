@@ -187,7 +187,8 @@
             
             <div class="flex items-center gap-3 mb-5" id="formModalHeader"></div>
             
-            <div class="flex flex-col md:flex-row gap-5 mb-5">
+            <!-- 修复布局拉伸: 加入了 md:items-start 防止右侧内容拉高左侧上传框 -->
+            <div class="flex flex-col md:flex-row gap-5 mb-5 md:items-start">
                 <div class="w-full md:w-5/12 flex flex-col gap-4">
                     <div>
                         <label class="form-label">分类</label>
@@ -200,20 +201,22 @@
                         </label>
                         <input type="text" id="titleInput" placeholder="一句话描述用途" class="form-input px-3 py-2.5">
                     </div>
-                    <div class="flex-grow flex flex-col">
+                    
+                    <div class="w-full flex flex-col">
                         <label class="form-label flex justify-between">
                             <span>视觉参考图</span>
                             <span class="text-gray-500 font-normal normal-case tracking-normal">支持直接 Ctrl+V 粘贴</span>
                         </label>
                         
+                        <!-- 固定上传区与预览区的高度 h-[160px] 保持比例优美，防止高度失控 -->
                         <div id="uploadZone" onclick="document.getElementById('imageInput').click()" 
-                            class="flex-grow border border-dashed border-white/15 rounded-lg p-4 text-center cursor-pointer bg-[#0B0B15]/50 hover:bg-[#0B0B15] hover:border-neonPink transition-all group flex flex-col items-center justify-center min-h-[120px]">
+                            class="w-full h-[160px] border border-dashed border-white/15 rounded-lg p-4 text-center cursor-pointer bg-[#0B0B15]/50 hover:bg-[#0B0B15] hover:border-neonPink transition-all group flex flex-col items-center justify-center">
                             <svg class="w-5 h-5 text-gray-600 group-hover:text-neonPink transition-colors mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                             <span id="uploadTip" class="text-[11px] text-gray-500 font-medium group-hover:text-white transition-colors">点击或粘贴截图</span>
                         </div>
                         <input type="file" id="imageInput" accept="image/*" class="hidden">
 
-                        <div id="previewWrapper" class="hidden relative group h-full min-h-[120px]">
+                        <div id="previewWrapper" class="hidden relative group w-full h-[160px]">
                             <img id="previewImg" src="" class="w-full h-full object-cover rounded-lg border border-white/10">
                             <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center backdrop-blur-sm">
                                 <button onclick="clearSelectedImage()" class="btn-icon-rounded text-white bg-danger hover:bg-red-600 shadow-lg transform scale-90 group-hover:scale-100">
@@ -224,9 +227,10 @@
                     </div>
                 </div>
 
-                <div class="w-full md:w-7/12 flex flex-col">
+                <div class="w-full md:w-7/12 flex flex-col h-full">
                     <label class="form-label">内容 <span class="text-neonPink">*</span></label>
-                    <textarea id="contentInput" placeholder="描述你希望 AI 做什么... 可以包含 {{你的变量}} 实现点击复制时动态填空。" class="form-input px-3 py-2.5 flex-grow resize-y leading-relaxed min-h-[200px]" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
+                    <!-- 移除 JS oninput 强制撑高，改为原生 resize-y，设定初始平衡高度 280px 并限制最大高度启用内部滚动 -->
+                    <textarea id="contentInput" placeholder="描述你希望 AI 做什么... 可以包含 {{你的变量}} 实现点击复制时动态填空。" class="form-input px-3 py-2.5 w-full resize-y leading-relaxed h-[280px] max-h-[50vh] overflow-y-auto"></textarea>
                 </div>
             </div>
 
@@ -276,8 +280,8 @@
                 <button onclick="switchSettingsTab('advanced')" id="tab-btn-advanced" class="flex-1 py-2.5 text-xs font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-300 transition-colors">高级</button>
             </div>
             
-            <!-- Tab 内容区块 -->
-            <div class="relative min-h-[300px]">
+            <!-- Tab 内容区块：加入安全边界 max-h-[55vh] 和内部滚动，防止设置项过多撑爆屏幕 -->
+            <div class="relative min-h-[300px] max-h-[55vh] overflow-y-auto overflow-x-hidden pr-2">
                 
                 <!-- 1. 云端与备份 Tab -->
                 <div id="tab-content-sync" class="space-y-6 block">
@@ -636,11 +640,8 @@
             
             const contentEl = document.getElementById('contentInput');
             contentEl.value = item.content || '';
-            
-            setTimeout(() => {
-                contentEl.style.height = 'auto';
-                contentEl.style.height = contentEl.scrollHeight + 'px';
-            }, 10);
+
+            // 移除原本用于自动撑高 textarea 的 setTimeout，交由 CSS 控制
 
             if (item.image) {
                 currentImageBase64 = item.image;
