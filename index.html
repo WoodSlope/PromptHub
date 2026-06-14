@@ -88,11 +88,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        .scroll-mask {
-            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-        }
-
         .gradient-border {
             position: relative;
             background: linear-gradient(135deg, #151522, #151522) padding-box,
@@ -143,26 +138,26 @@
     <header class="fixed top-0 inset-x-0 h-14 backdrop-blur-xl bg-darkBg/80 border-b border-white/5 z-40 flex items-center justify-between px-4 md:px-6 shadow-sm gap-3">
         <div class="flex items-center space-x-2 shrink-0">
             <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-neonPink to-neonCyan flex items-center justify-center shadow-[0_0_8px_rgba(255,0,122,0.5)]">
-                <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                <svg class="w-3.5 h-3.5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
             </div>
             <h1 class="text-lg font-bold tracking-tight text-white hidden md:block">Prompt<span class="text-gradient">Hub</span></h1>
         </div>
 
         <div class="flex-1 max-w-lg relative group">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 transition-colors group-focus-within:text-neonCyan z-10 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 transition-colors group-focus-within:text-neonCyan z-10 pointer-events-none shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             <input type="text" id="searchInput" placeholder="搜索... (⌘K)" class="form-input relative z-0 !bg-[#151522]/80 backdrop-blur-sm pl-9 pr-14 py-2 placeholder-gray-400">
             
             <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 z-10">
                 <span id="searchShortcutHint" class="text-[9px] px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-gray-500 pointer-events-none">⌘K</span>
-                <button id="clearSearchBtn" onclick="clearSearch()" class="p-1 text-gray-500 hover:text-white hidden transition-colors" title="清空搜索">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <button id="clearSearchBtn" onclick="clearSearch()" class="p-1 text-gray-500 hover:text-white hidden transition-colors shrink-0" title="清空搜索">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
-            <button onclick="openSettingsModal()" class="btn-icon-rounded" title="设置与管理">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <button onclick="openSettingsModal()" class="btn-icon-rounded shrink-0" title="设置与管理">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             </button>
             <button onclick="openAddModal()" class="btn-outline-gradient text-white px-4 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap">
                 + 新建
@@ -183,11 +178,11 @@
     <!-- ================= 核心表单 Modal ================= -->
     <div id="addModal" onclick="if(event.target === this) attemptCloseAddModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 overflow-y-auto px-4 py-6">
         <div class="modal-panel max-w-3xl w-full" id="addModalContent">
-            <button onclick="attemptCloseAddModal()" class="btn-icon-rounded absolute top-4 right-4 z-10"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            <button onclick="attemptCloseAddModal()" class="btn-icon-rounded absolute top-4 right-4 z-10 shrink-0"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             
             <div class="flex items-center gap-3 mb-5" id="formModalHeader"></div>
             
-            <!-- 修复布局拉伸: 加入了 md:items-start 防止右侧内容拉高左侧上传框 -->
+            <!-- V8 Rule: md:items-start 防止由于右侧文本域自适应撑高导致左侧图片框变形 -->
             <div class="flex flex-col md:flex-row gap-5 mb-5 md:items-start">
                 <div class="w-full md:w-5/12 flex flex-col gap-4">
                     <div>
@@ -199,7 +194,8 @@
                             <span>标题</span>
                             <span class="text-[9px] text-neonCyan font-normal normal-case"><span class="font-mono">{{变量}}</span> 支持动态填空</span>
                         </label>
-                        <input type="text" id="titleInput" placeholder="一句话描述用途" class="form-input px-3 py-2.5">
+                        <!-- V8 Rule: onfocus="this.select()" 满足完美键盘聚焦的全选要求 -->
+                        <input type="text" id="titleInput" placeholder="一句话描述用途" class="form-input px-3 py-2.5" onfocus="this.select()">
                     </div>
                     
                     <div class="w-full flex flex-col">
@@ -208,10 +204,9 @@
                             <span class="text-gray-500 font-normal normal-case tracking-normal">支持直接 Ctrl+V 粘贴</span>
                         </label>
                         
-                        <!-- 固定上传区与预览区的高度 h-[160px] 保持比例优美，防止高度失控 -->
                         <div id="uploadZone" onclick="document.getElementById('imageInput').click()" 
                             class="w-full h-[160px] border border-dashed border-white/15 rounded-lg p-4 text-center cursor-pointer bg-[#0B0B15]/50 hover:bg-[#0B0B15] hover:border-neonPink transition-all group flex flex-col items-center justify-center">
-                            <svg class="w-5 h-5 text-gray-600 group-hover:text-neonPink transition-colors mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            <svg class="w-5 h-5 text-gray-600 group-hover:text-neonPink transition-colors mb-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                             <span id="uploadTip" class="text-[11px] text-gray-500 font-medium group-hover:text-white transition-colors">点击或粘贴截图</span>
                         </div>
                         <input type="file" id="imageInput" accept="image/*" class="hidden">
@@ -219,8 +214,8 @@
                         <div id="previewWrapper" class="hidden relative group w-full h-[160px]">
                             <img id="previewImg" src="" class="w-full h-full object-cover rounded-lg border border-white/10">
                             <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center backdrop-blur-sm">
-                                <button onclick="clearSelectedImage()" class="btn-icon-rounded text-white bg-danger hover:bg-red-600 shadow-lg transform scale-90 group-hover:scale-100">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                <button onclick="clearSelectedImage()" class="btn-icon-rounded text-white bg-danger hover:bg-red-600 shadow-lg transform scale-90 group-hover:scale-100 shrink-0">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                 </button>
                             </div>
                         </div>
@@ -229,12 +224,12 @@
 
                 <div class="w-full md:w-7/12 flex flex-col h-full">
                     <label class="form-label">内容 <span class="text-neonPink">*</span></label>
-                    <!-- 移除 JS oninput 强制撑高，改为原生 resize-y，设定初始平衡高度 280px 并限制最大高度启用内部滚动 -->
-                    <textarea id="contentInput" placeholder="描述你希望 AI 做什么... 可以包含 {{你的变量}} 实现点击复制时动态填空。" class="form-input px-3 py-2.5 w-full resize-y leading-relaxed h-[280px] max-h-[50vh] overflow-y-auto"></textarea>
+                    <!-- V8 Rule: 动态文本域：Textarea 必须高度自适应。配合限制最高高度防止布局溢出 -->
+                    <textarea id="contentInput" placeholder="描述你希望 AI 做什么... 可以包含 {{你的变量}} 实现点击复制时动态填空。" class="form-input px-3 py-2.5 w-full resize-none leading-relaxed min-h-[200px] max-h-[50vh] overflow-y-auto" oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'"></textarea>
                 </div>
             </div>
 
-            <div class="flex gap-3 pt-2">
+            <div class="flex gap-3 pt-2 border-t border-white/5 pt-4">
                 <button onclick="attemptCloseAddModal()" class="btn-ghost flex-1 border border-white/10 hover:bg-white/10">取消编辑</button>
                 <button id="formSubmitBtn" onclick="savePrompt()" class="btn-primary flex-[2]"></button>
             </div>
@@ -244,10 +239,10 @@
     <!-- ================= 动态变量引擎 Modal ================= -->
     <div id="variableModal" onclick="if(event.target === this) closeVariableModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4">
         <div class="modal-panel max-w-sm w-full" id="variableModalContent">
-            <button onclick="closeVariableModal()" class="btn-icon-rounded absolute top-4 right-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            <button onclick="closeVariableModal()" class="btn-icon-rounded absolute top-4 right-4 shrink-0"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             <div class="flex items-center gap-3 mb-5">
                 <div class="p-2 bg-neonCyan/10 rounded-lg border border-neonCyan/20">
-                    <svg class="w-5 h-5 text-neonCyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    <svg class="w-5 h-5 text-neonCyan shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
                 </div>
                 <div>
                     <h3 class="text-base font-bold text-white tracking-tight">Dynamic <span class="text-neonCyan">Variables</span></h3>
@@ -258,7 +253,7 @@
             <div id="variableInputsContainer" class="space-y-4 mb-6 max-h-[60vh] overflow-y-auto no-scrollbar pr-1"></div>
             
             <button onclick="executeVariableCopy()" class="btn-primary flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                 填充并复制 (Enter)
             </button>
         </div>
@@ -267,9 +262,9 @@
     <!-- ================= 全局设置 Modal ================= -->
     <div id="settingsModal" onclick="if(event.target === this) closeSettingsModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4 overflow-y-auto">
         <div class="modal-panel max-w-md w-full" id="settingsModalContent">
-            <button onclick="closeSettingsModal()" class="btn-icon-rounded absolute top-4 right-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            <button onclick="closeSettingsModal()" class="btn-icon-rounded absolute top-4 right-4 shrink-0"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             <div class="flex items-center gap-3 mb-5">
-                <div class="p-2 bg-neonPink/10 rounded-lg border border-neonPink/20"><svg class="w-5 h-5 text-neonPink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>
+                <div class="p-2 bg-neonPink/10 rounded-lg border border-neonPink/20"><svg class="w-5 h-5 text-neonPink shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>
                 <h3 class="text-lg font-bold text-white tracking-tight">Global <span class="text-neonPink">Settings</span></h3>
             </div>
 
@@ -280,19 +275,19 @@
                 <button onclick="switchSettingsTab('advanced')" id="tab-btn-advanced" class="flex-1 py-2.5 text-xs font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-300 transition-colors">高级</button>
             </div>
             
-            <!-- Tab 内容区块：加入安全边界 max-h-[55vh] 和内部滚动，防止设置项过多撑爆屏幕 -->
-            <div class="relative min-h-[300px] max-h-[55vh] overflow-y-auto overflow-x-hidden pr-2">
+            <!-- V8 Rule: Tab 内容区块加入安全边界 max-h-[55vh] 和内部滚动，防止设置项过多撑爆屏幕 -->
+            <div class="relative min-h-[300px] max-h-[55vh] overflow-y-auto overflow-x-hidden pr-2 no-scrollbar">
                 
                 <!-- 1. 云端与备份 Tab -->
                 <div id="tab-content-sync" class="space-y-6 block">
                     <div class="p-3 bg-[#0B0B15]/50 border border-neonCyan/20 rounded-xl">
                         <h4 class="form-label flex items-center justify-between !text-neonCyan mb-3">
                             <span class="flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path></svg>
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path></svg>
                                 GitHub 云同步 (BYOK)
                             </span>
-                            <span class="text-[9px] px-1.5 py-0.5 border border-green-500/30 text-green-400 bg-green-500/10 rounded flex items-center gap-1" title="End-to-End Encryption Available">
-                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> E2EE
+                            <span class="text-[9px] px-1.5 py-0.5 border border-green-500/30 text-green-400 bg-green-500/10 rounded flex items-center gap-1 shrink-0" title="End-to-End Encryption Available">
+                                <svg class="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> E2EE
                             </span>
                         </h4>
                         <div class="space-y-2.5">
@@ -300,7 +295,7 @@
                             <input type="text" id="gistIdInput" placeholder="Gist ID (首次推送留空，自动创建)" class="form-input px-3 py-2 text-xs font-mono" oninput="localStorage.setItem('PromptHub_GistId', this.value.trim())">
                             <div class="relative">
                                 <input type="password" id="syncPasswordInput" placeholder="数据加密密码 (可选，输入后开启军工级加密)" class="form-input px-3 py-2 text-xs border-green-500/30 focus:border-green-400 focus:ring-green-400" oninput="localStorage.setItem('PromptHub_SyncPassword', this.value.trim())">
-                                <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-green-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-green-500/50 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
                             <div class="flex gap-2 pt-1">
                                 <button id="btn-push-sync" onclick="pushToCloud()" class="btn-panel !bg-neonCyan/10 !text-neonCyan !border-neonCyan/20 hover:!bg-neonCyan/20 hover:!border-neonCyan/50">
@@ -334,7 +329,7 @@
                             <input type="text" id="newCategoryInput" placeholder="输入新分类名称..." class="form-input px-3 py-2" onkeydown="if(event.key === 'Enter') addCategory();">
                             <button onclick="addCategory()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors border border-white/5 shrink-0">添加</button>
                         </div>
-                        <div class="bg-[#0B0B15] border border-white/5 rounded-lg p-1.5 max-h-60 overflow-y-auto no-scrollbar space-y-1" id="settingsCategoryList"></div>
+                        <div class="bg-[#0B0B15] border border-white/5 rounded-lg p-1.5 space-y-1" id="settingsCategoryList"></div>
                     </div>
                 </div>
 
@@ -354,15 +349,16 @@
                     <div class="pt-4 border-t border-white/5">
                         <h4 class="form-label text-gray-400">开发与测试</h4>
                         <button onclick="insertMockData()" class="btn-panel w-full bg-transparent border-dashed hover:bg-white/5 hover:text-white text-gray-400 border-white/10">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
                             注入样式演示数据 (Mock)
                         </button>
                     </div>
                     
                     <div class="pt-4 border-t border-danger/20">
                         <h4 class="form-label text-danger">危险操作</h4>
+                        <!-- V8 Rule: 优雅防呆，自定义 Danger Modal -->
                         <button onclick="openCustomConfirm('Clear <span class=\'text-danger\'>All Data</span>', '警告：此操作将清空本地所有提示词数据且不可恢复！是否继续？', '一键清空', async () => { await dbOps.clearAll(); showToast('本地库已完全清空'); loadAndRenderList(); closeSettingsModal(); })" class="btn-panel w-full bg-danger/10 hover:bg-danger/20 text-danger border-danger/20 hover:border-danger/50 font-bold tracking-wide">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             一键清空本地库
                         </button>
                     </div>
@@ -376,7 +372,7 @@
         <div class="modal-panel max-w-xs w-full" id="confirmModalContent">
             <div class="flex items-center gap-2 mb-3">
                 <div class="p-1.5 bg-danger/10 rounded border border-danger/20">
-                    <svg class="w-4 h-4 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <svg class="w-4 h-4 text-danger shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>
                 <h3 class="text-base font-bold text-white tracking-tight" id="confirmTitle">Confirm</h3>
             </div>
@@ -389,19 +385,20 @@
     </div>
 
     <!-- ================= 全屏图片预览灯箱 ================= -->
+    <!-- V8 Rule: 内建灯箱，禁止 window.open -->
     <div id="imageLightboxModal" onclick="if(event.target === this) closeImageLightbox()" class="fixed inset-0 bg-black/95 backdrop-blur-md z-[70] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 p-4 sm:p-10 cursor-zoom-out">
-        <button onclick="closeImageLightbox()" class="btn-icon-rounded absolute top-4 right-4 z-10 bg-black/50 hover:bg-black text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+        <button onclick="closeImageLightbox()" class="btn-icon-rounded absolute top-4 right-4 z-10 bg-black/50 hover:bg-black text-white shrink-0"><svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
         <img id="lightboxImg" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl transform scale-95 transition-transform duration-300 pointer-events-none" />
     </div>
 
     <!-- Toast 提示 -->
-    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 bg-darkCard border border-white/10 text-white px-4 py-2 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] text-xs font-medium opacity-0 pointer-events-none transition-transform transition-opacity z-[80] flex items-center gap-1.5 transform -translate-y-2">
+    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 bg-darkCard border border-white/10 text-white px-4 py-2 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] text-xs font-medium opacity-0 pointer-events-none transition-all z-[80] flex items-center gap-1.5 transform -translate-y-2">
         <span id="toastIcon"></span>
         <span id="toastMessage"></span>
     </div>
 
     <script>
-        // UUID Polyfill (安全上下文降级处理)
+        // V8 Rule 1: 拒绝自增 ID，手写 UUID Polyfill 防御非安全上下文失效
         function generateUUID() {
             if (typeof crypto !== 'undefined' && crypto.randomUUID) {
                 return crypto.randomUUID();
@@ -426,7 +423,7 @@
         function getCategories() {
             const saved = localStorage.getItem('PromptHub_Categories');
             let cats = saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
-            // QA 终极防守：如果系统兜底分类"通用"被用户通过 DevTools 强行删掉，则直接补回，防止数据变为无主孤儿。
+            // V8 Rule 1: 孤儿数据防御 (兜底恢复机制)
             if (!cats.includes('通用')) {
                 cats.unshift('通用');
                 saveCategories(cats);
@@ -451,8 +448,9 @@
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
                 request.onupgradeneeded = (e) => {
                     const database = e.target.result;
+                    // 使用 keyPath id 为主键，彻底抛弃 autoincrement 
                     if (!database.objectStoreNames.contains(STORE_NAME)) {
-                        database.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true }); 
+                        database.createObjectStore(STORE_NAME, { keyPath: 'id' }); 
                     }
                 };
                 request.onsuccess = (e) => { db = e.target.result; resolve(db); };
@@ -496,8 +494,8 @@
             const toast = document.getElementById('toast');
             document.getElementById('toastMessage').innerText = message;
             document.getElementById('toastIcon').innerHTML = type === 'success' 
-                ? '<svg class="w-3.5 h-3.5 text-neonCyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>'
-                : '<svg class="w-3.5 h-3.5 text-neonPink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                ? '<svg class="w-3.5 h-3.5 text-neonCyan shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>'
+                : '<svg class="w-3.5 h-3.5 text-neonPink shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
             
             toast.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
             toast.classList.add('translate-y-0');
@@ -591,7 +589,7 @@
             currentEditId = null; 
             document.getElementById('formModalHeader').innerHTML = `
                 <div class="p-2 bg-neonCyan/10 rounded-lg border border-neonCyan/20">
-                    <svg class="w-5 h-5 text-neonCyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <svg class="w-5 h-5 text-neonCyan shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 </div>
                 <h3 class="text-lg font-bold text-white tracking-tight">Create <span class="text-neonCyan">Prompt</span></h3>
             `;
@@ -609,7 +607,7 @@
             
             const contentEl = document.getElementById('contentInput');
             contentEl.value = '';
-            contentEl.style.height = 'auto';
+            contentEl.style.height = 'auto'; // Reset on new
             
             clearSelectedImage();
             
@@ -621,7 +619,7 @@
             currentEditId = id; 
             document.getElementById('formModalHeader').innerHTML = `
                 <div class="p-2 bg-neonPink/10 rounded-lg border border-neonPink/20">
-                    <svg class="w-5 h-5 text-neonPink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    <svg class="w-5 h-5 text-neonPink shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                 </div>
                 <h3 class="text-lg font-bold text-white tracking-tight">Edit <span class="text-neonPink">Prompt</span></h3>
             `;
@@ -640,8 +638,12 @@
             
             const contentEl = document.getElementById('contentInput');
             contentEl.value = item.content || '';
-
-            // 移除原本用于自动撑高 textarea 的 setTimeout，交由 CSS 控制
+            
+            // V8 Rule 2: 动态文本域初始赋值后必须强制触发一次高度重算
+            setTimeout(() => {
+                contentEl.style.height = 'auto';
+                contentEl.style.height = contentEl.scrollHeight + 'px';
+            }, 10);
 
             if (item.image) {
                 currentImageBase64 = item.image;
@@ -660,7 +662,8 @@
             const modal = document.getElementById('addModal');
             const content = document.getElementById('addModalContent');
             modal.classList.remove('opacity-0', 'pointer-events-none');
-            // PM 修复 3: 将焦点延迟拉长到 100ms，保证低端设备完成重绘，彻底解决手机端软键盘被吃掉的 Bug
+            
+            // V8 Rule 2: 完美键盘聚焦，必须延迟 100ms
             setTimeout(() => {
                 content.classList.remove('scale-95');
                 const titleInput = document.getElementById('titleInput');
@@ -673,6 +676,7 @@
 
         function attemptCloseAddModal() {
             const currentState = getFormStateSnapshot();
+            // V8 Rule 2: 表单脏检查 (Dirty Check)，有修改必须拦截
             if (currentState !== initialFormState) {
                 openCustomConfirm(
                     'Discard <span class="text-danger">Changes</span>', 
@@ -748,7 +752,7 @@
             }
             list.innerHTML = cats.map((cat, index) => {
                 const isDefault = cat === '通用';
-                // Dev 修复 1: 彻底防御单双引号破坏 DOM 结构的终极逃逸方案，防止双引号闭合 onclick 属性
+                // V8 Rule 4: 双重 DOM 注入清洗，严防 JS 语法错误或闭合注入
                 const safeCatJs = escapeHtml(cat.replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
                 
                 return `
@@ -760,19 +764,19 @@
                     ${isDefault ? '' : `
                     <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" id="cat-actions-${index}">
                         <button onclick="startEditCategory(${index})" class="btn-icon-rounded p-1 hover:text-neonCyan hover:bg-neonCyan/10">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         </button>
                         <button onclick="confirmDeleteCategory('${safeCatJs}')" class="btn-icon-rounded p-1 hover:text-danger hover:bg-danger/10">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                     </div>
 
                     <div class="hidden items-center gap-1 shrink-0" id="cat-save-actions-${index}">
                         <button onclick="saveEditCategory(${index}, '${safeCatJs}')" class="btn-icon-rounded p-1 hover:text-green-400 hover:bg-green-400/10">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         </button>
                         <button onclick="cancelEditCategory(${index})" class="btn-icon-rounded p-1 hover:text-gray-400 hover:bg-white/10">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </div>
                     `}
@@ -885,6 +889,7 @@
         }
 
         function openConfirmModal(id) {
+            // V8 Rule 4: 危险删除操作自定义 Danger Modal
             openCustomConfirm(
                 'Confirm <span class="text-danger">Delete</span>', 
                 '此操作将从数据库中永久销毁该记录，确认继续？', 
@@ -992,11 +997,12 @@
             const content = document.getElementById('variableModalContent');
             modal.classList.remove('opacity-0', 'pointer-events-none');
             
+            // V8 Rule 2: 延迟确保焦点正确挂载
             setTimeout(() => {
                 content.classList.remove('scale-95');
                 const firstInput = document.getElementById('var-input-0');
                 if(firstInput) firstInput.focus();
-            }, 100); // 同步将变量弹窗的 focus 延长至 100ms，确保移动端键盘响应
+            }, 100); 
             
             document.body.style.overflow = 'hidden';
         }
@@ -1024,6 +1030,8 @@
             });
             
             const regex = getVariableRegex();
+            
+            // V8 Rule 4: 单次遍历正则替换，防连环污染
             const finalString = pendingVariableTemplate.replace(regex, (match) => {
                 return valueMap.has(match) ? valueMap.get(match) : match;
             });
@@ -1053,6 +1061,7 @@
         // ==========================================
 
         const cryptoOps = {
+            // V8 Rule 1: 原生 window.crypto.subtle 实现 E2EE
             async deriveKey(password, salt) {
                 const enc = new TextEncoder();
                 const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]);
@@ -1229,10 +1238,12 @@
         function processImageFile(file) {
             document.getElementById('uploadTip').innerText = "处理压缩中...";
             const img = new Image();
+            
+            // V8 Rule 1: 防止内存泄漏，创建 ObjectURL 必须 revoke
             const objectUrl = URL.createObjectURL(file);
             
             img.onload = () => {
-                URL.revokeObjectURL(objectUrl); 
+                URL.revokeObjectURL(objectUrl); // 及时释放
                 const maxWidth = 1024; let { width, height } = img;
                 if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
                 const canvas = document.createElement('canvas');
@@ -1253,13 +1264,16 @@
             if (file) processImageFile(file);
         });
 
+        // V8 Rule 2: 全局级剪贴板截图侦听，提供无缝 Aha-Moment
         document.addEventListener('paste', (e) => {
             const addModal = document.getElementById('addModal');
             const isModalClosed = addModal.classList.contains('opacity-0');
 
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let index in items) {
-                const item = items[index];
+            
+            // QA Fix: 弃用危险的 for...in，改为标准 for 循环阻断原型链污染导致的崩溃
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
                 if (item.kind === 'file' && item.type.startsWith('image/')) {
                     const file = item.getAsFile();
                     
@@ -1310,6 +1324,7 @@
             const hasValue = !!e.target.value.trim();
             document.getElementById('clearSearchBtn').classList.toggle('hidden', !hasValue);
             
+            // V8 Rule 4: 高频搜索 300ms 强制防抖防性能损耗
             clearTimeout(searchDebounceTimer);
             searchDebounceTimer = setTimeout(() => {
                 loadAndRenderList();
@@ -1353,9 +1368,11 @@
                     let localCats = new Set(getCategories());
                     
                     for (const item of data) {
+                        // 强制覆盖补全 UUID
                         if (!item.id) item.id = generateUUID();
                         if (item.content) {
                             if (!item.timestamp) item.timestamp = Date.now();
+                            // V8 Rule 1: 自动提取并注册外部特有标签
                             if (item.category) localCats.add(item.category);
                             await dbOps.put(item); 
                             importedCount++;
@@ -1440,6 +1457,7 @@
                 statTotal.innerText = records.length;
 
                 if (records.length === 0) {
+                    // V8 Rule 3: 搜索无结果时带上当前词汇和高亮清除按钮打通死胡同
                     let emptyMsg = '库中暂无数据，请新建或在设置中注入演示数据。';
                     if (searchQuery) {
                         emptyMsg = `未找到包含 "<span class="text-neonCyan">${escapeHtml(searchQuery)}</span>" 的记录。<br><button onclick="clearSearch()" class="mt-4 px-4 py-1.5 bg-neonPink/10 text-neonPink border border-neonPink/30 rounded-full hover:bg-neonPink/20 transition-colors text-[11px] font-bold">清空搜索条件</button>`;
@@ -1482,7 +1500,8 @@
                                 
                                 ${displayTitle !== '未命名片段' ? `<h4 class="text-xs font-bold text-white mb-2 tracking-wide truncate">${escapeHtml(displayTitle)}</h4>` : ''}
                                 
-                                <div class="scroll-mask whitespace-pre-wrap text-xs text-gray-300 font-mono leading-relaxed bg-[#0B0B15] p-3 rounded-lg border border-white/5 max-h-32 overflow-y-auto no-scrollbar mb-3 relative flex-grow" id="content-${item.id}">${escapeHtml(item.content)}</div>
+                                <!-- Product Fix: 移除了 scroll-mask 阻止模糊截断，回归纯净阅读体验 -->
+                                <div class="whitespace-pre-wrap text-xs text-gray-300 font-mono leading-relaxed bg-[#0B0B15] p-3 rounded-lg border border-white/5 max-h-32 overflow-y-auto no-scrollbar mb-3 relative flex-grow" id="content-${item.id}">${escapeHtml(item.content)}</div>
                                 
                                 <div class="flex items-center gap-1.5 mt-auto pt-2 border-t border-white/5">
                                     <button onclick="copyPromptTextById('${item.id}')" class="flex-1 btn-card-action hover:text-white hover:bg-white/10 text-[11px] font-bold py-2 gap-1.5 text-gray-300 transition-colors" title="复制">
@@ -1491,14 +1510,14 @@
                                     </button>
                                     
                                     <button onclick="toggleFavorite('${item.id}')" class="w-8 h-8 btn-card-action shrink-0 ${item.isFavorite ? 'text-yellow-400 bg-yellow-400/10 border-yellow-400/30' : 'hover:text-yellow-400 hover:bg-yellow-400/10 hover:border-yellow-400/30'}" title="${item.isFavorite ? '取消收藏' : '加入收藏'}">
-                                        <svg class="w-4 h-4" fill="${item.isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+                                        <svg class="w-4 h-4 shrink-0" fill="${item.isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
                                     </button>
 
                                     <button onclick="openEditModal('${item.id}')" class="w-8 h-8 btn-card-action hover:text-white hover:bg-neonCyan/20 hover:border-neonCyan/50 shrink-0" title="编辑">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
                                     <button onclick="openConfirmModal('${item.id}')" class="w-8 h-8 btn-card-action hover:text-white hover:bg-danger/20 hover:border-danger/50 shrink-0" title="删除">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 </div>
                             </div>
