@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 统一应用名称 -->
     <title>PromptHub - Neon Edition</title>
-    <!-- 添加与 Logo 完全一致的 SVG Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0%25' y1='100%25' x2='100%25' y2='0%25'><stop offset='0%25' stop-color='%23FF007A'/><stop offset='100%25' stop-color='%2300E5FF'/></linearGradient></defs><circle cx='12' cy='12' r='12' fill='url(%23g)'/><path stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none' d='M13 10V3L4 14h7v7l9-11h-7z' transform='translate(4,4) scale(0.66)'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -39,7 +37,7 @@
                 @apply px-4 py-1.5 text-xs font-bold text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors;
             }
             .btn-panel {
-                @apply flex flex-1 items-center justify-center gap-1.5 px-4 py-2 bg-[#0B0B15] border border-white/10 text-white text-xs rounded-lg transition-colors;
+                @apply flex flex-1 items-center justify-center gap-1.5 px-4 py-2 bg-[#0B0B15] border border-white/10 text-white text-xs rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
             }
             .btn-icon-rounded {
                 @apply flex items-center justify-center p-1.5 text-gray-500 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-all shrink-0;
@@ -74,7 +72,6 @@
             background-attachment: fixed;
         }
 
-        /* 修复 4: 注入全局优美的暗黑滚动条，干掉 Windows/Mac 丑陋的原生滚动条 */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
@@ -153,8 +150,14 @@
 
         <div class="flex-1 max-w-lg relative group">
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 transition-colors group-focus-within:text-neonCyan z-10 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <input type="text" id="searchInput" placeholder="搜索标题或内容..." 
-                class="form-input relative z-0 !bg-[#151522]/80 backdrop-blur-sm pl-9 pr-4 py-2 placeholder-gray-400">
+            <input type="text" id="searchInput" placeholder="搜索... (⌘K)" class="form-input relative z-0 !bg-[#151522]/80 backdrop-blur-sm pl-9 pr-14 py-2 placeholder-gray-400">
+            
+            <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 z-10">
+                <span id="searchShortcutHint" class="text-[9px] px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-gray-500 pointer-events-none">⌘K</span>
+                <button id="clearSearchBtn" onclick="clearSearch()" class="p-1 text-gray-500 hover:text-white hidden transition-colors" title="清空搜索">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
@@ -178,9 +181,9 @@
     </div>
 
     <!-- ================= 核心表单 Modal ================= -->
-    <div id="addModal" onclick="if(event.target === this) closeAddModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 overflow-y-auto px-4 py-6">
+    <div id="addModal" onclick="if(event.target === this) attemptCloseAddModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 overflow-y-auto px-4 py-6">
         <div class="modal-panel max-w-3xl w-full" id="addModalContent">
-            <button onclick="closeAddModal()" class="btn-icon-rounded absolute top-4 right-4 z-10"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            <button onclick="attemptCloseAddModal()" class="btn-icon-rounded absolute top-4 right-4 z-10"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             
             <div class="flex items-center gap-3 mb-5" id="formModalHeader"></div>
             
@@ -191,7 +194,10 @@
                         <select id="categorySelect" class="form-input px-3 py-2.5 cursor-pointer"></select>
                     </div>
                     <div>
-                        <label class="form-label">标题</label>
+                        <label class="form-label flex justify-between">
+                            <span>标题</span>
+                            <span class="text-[9px] text-neonCyan font-normal normal-case"><span class="font-mono">{{变量}}</span> 支持动态填空</span>
+                        </label>
                         <input type="text" id="titleInput" placeholder="一句话描述用途" class="form-input px-3 py-2.5">
                     </div>
                     <div class="flex-grow flex flex-col">
@@ -220,15 +226,41 @@
 
                 <div class="w-full md:w-7/12 flex flex-col">
                     <label class="form-label">内容 <span class="text-neonPink">*</span></label>
-                    <textarea id="contentInput" placeholder="描述你希望 AI 做什么..." class="form-input px-3 py-2.5 flex-grow resize-none leading-relaxed min-h-[200px]"></textarea>
+                    <textarea id="contentInput" placeholder="描述你希望 AI 做什么... 可以包含 {{你的变量}} 实现点击复制时动态填空。" class="form-input px-3 py-2.5 flex-grow resize-y leading-relaxed min-h-[200px]" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
                 </div>
             </div>
 
-            <button id="formSubmitBtn" onclick="savePrompt()" class="btn-primary"></button>
+            <div class="flex gap-3 pt-2">
+                <button onclick="attemptCloseAddModal()" class="btn-ghost flex-1 border border-white/10 hover:bg-white/10">取消编辑</button>
+                <button id="formSubmitBtn" onclick="savePrompt()" class="btn-primary flex-[2]"></button>
+            </div>
         </div>
     </div>
 
-    <!-- ================= 全局设置 Modal (修复：Tab 分栏梳理层级) ================= -->
+    <!-- ================= 动态变量引擎 Modal ================= -->
+    <div id="variableModal" onclick="if(event.target === this) closeVariableModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4">
+        <div class="modal-panel max-w-sm w-full" id="variableModalContent">
+            <button onclick="closeVariableModal()" class="btn-icon-rounded absolute top-4 right-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            <div class="flex items-center gap-3 mb-5">
+                <div class="p-2 bg-neonCyan/10 rounded-lg border border-neonCyan/20">
+                    <svg class="w-5 h-5 text-neonCyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white tracking-tight">Dynamic <span class="text-neonCyan">Variables</span></h3>
+                    <p class="text-[10px] text-gray-500">检测到模板变量，请填入具体内容。</p>
+                </div>
+            </div>
+            
+            <div id="variableInputsContainer" class="space-y-4 mb-6 max-h-[60vh] overflow-y-auto no-scrollbar pr-1"></div>
+            
+            <button onclick="executeVariableCopy()" class="btn-primary flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                填充并复制 (Enter)
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= 全局设置 Modal ================= -->
     <div id="settingsModal" onclick="if(event.target === this) closeSettingsModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4 overflow-y-auto">
         <div class="modal-panel max-w-md w-full" id="settingsModalContent">
             <button onclick="closeSettingsModal()" class="btn-icon-rounded absolute top-4 right-4"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
@@ -249,25 +281,33 @@
                 
                 <!-- 1. 云端与备份 Tab -->
                 <div id="tab-content-sync" class="space-y-6 block">
-                    <!-- BYOK 云端同步 -->
                     <div class="p-3 bg-[#0B0B15]/50 border border-neonCyan/20 rounded-xl">
-                        <h4 class="form-label flex items-center gap-1.5 !text-neonCyan mb-3">
-                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path></svg>
-                            GitHub 云同步 (BYOK)
+                        <h4 class="form-label flex items-center justify-between !text-neonCyan mb-3">
+                            <span class="flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path></svg>
+                                GitHub 云同步 (BYOK)
+                            </span>
+                            <span class="text-[9px] px-1.5 py-0.5 border border-green-500/30 text-green-400 bg-green-500/10 rounded flex items-center gap-1" title="End-to-End Encryption Available">
+                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> E2EE
+                            </span>
                         </h4>
                         <div class="space-y-2.5">
-                            <input type="password" id="githubTokenInput" placeholder="请输入 GitHub PAT (Personal Access Token)" class="form-input px-3 py-2 text-xs">
-                            <input type="text" id="gistIdInput" placeholder="Gist ID (首次推送留空，自动创建)" class="form-input px-3 py-2 text-xs font-mono">
+                            <input type="password" id="githubTokenInput" placeholder="请输入 GitHub PAT (Personal Access Token)" class="form-input px-3 py-2 text-xs" oninput="localStorage.setItem('PromptHub_GithubToken', this.value.trim())">
+                            <input type="text" id="gistIdInput" placeholder="Gist ID (首次推送留空，自动创建)" class="form-input px-3 py-2 text-xs font-mono" oninput="localStorage.setItem('PromptHub_GistId', this.value.trim())">
+                            <div class="relative">
+                                <input type="password" id="syncPasswordInput" placeholder="数据加密密码 (可选，输入后开启军工级加密)" class="form-input px-3 py-2 text-xs border-green-500/30 focus:border-green-400 focus:ring-green-400" oninput="localStorage.setItem('PromptHub_SyncPassword', this.value.trim())">
+                                <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-green-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
                             <div class="flex gap-2 pt-1">
-                                <button onclick="pushToCloud()" class="btn-panel !bg-neonCyan/10 !text-neonCyan !border-neonCyan/20 hover:!bg-neonCyan/20 hover:!border-neonCyan/50">
+                                <button id="btn-push-sync" onclick="pushToCloud()" class="btn-panel !bg-neonCyan/10 !text-neonCyan !border-neonCyan/20 hover:!bg-neonCyan/20 hover:!border-neonCyan/50">
                                     ↑ 强制推送
                                 </button>
-                                <button onclick="pullFromCloud()" class="btn-panel !bg-yellow-400/10 !text-yellow-400 !border-yellow-400/20 hover:!bg-yellow-400/20 hover:!border-yellow-400/50">
+                                <button id="btn-pull-sync" onclick="pullFromCloud()" class="btn-panel !bg-yellow-400/10 !text-yellow-400 !border-yellow-400/20 hover:!bg-yellow-400/20 hover:!border-yellow-400/50">
                                     ↓ 云端合并
                                 </button>
                             </div>
                             <p class="text-[9px] text-gray-500 leading-relaxed">
-                                * 数据作为 Private Gist 加密存储。<a href="https://github.com/settings/tokens/new?scopes=gist&description=PromptHub%20Sync" target="_blank" class="text-neonCyan hover:underline">点击获取 Token</a>
+                                * <a href="https://github.com/settings/tokens/new?scopes=gist&description=PromptHub%20Sync" target="_blank" class="text-neonCyan hover:underline">点击获取 Token</a>。若设置了加密密码，云端将仅存储 AES-GCM 乱码密文。
                             </p>
                         </div>
                     </div>
@@ -287,7 +327,7 @@
                     <div>
                         <h4 class="form-label">自定义分类标签</h4>
                         <div class="flex gap-2 mb-3">
-                            <input type="text" id="newCategoryInput" placeholder="输入新分类名称..." class="form-input px-3 py-2">
+                            <input type="text" id="newCategoryInput" placeholder="输入新分类名称..." class="form-input px-3 py-2" onkeydown="if(event.key === 'Enter') addCategory();">
                             <button onclick="addCategory()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors border border-white/5 shrink-0">添加</button>
                         </div>
                         <div class="bg-[#0B0B15] border border-white/5 rounded-lg p-1.5 max-h-60 overflow-y-auto no-scrollbar space-y-1" id="settingsCategoryList"></div>
@@ -297,6 +337,17 @@
                 <!-- 3. 高级 Tab -->
                 <div id="tab-content-advanced" class="space-y-6 hidden">
                     <div>
+                        <h4 class="form-label text-gray-400">动态变量解析策略</h4>
+                        <select id="varRegexSelect" class="form-input px-3 py-2 cursor-pointer text-xs" onchange="localStorage.setItem('PromptHub_VarRegex', this.value)">
+                            <option value="safe">安全模式：解析 {{变量}}、[[变量]]、【变量】</option>
+                            <option value="aggressive">激进模式：额外包含 [变量]、&lt;变量&gt;</option>
+                        </select>
+                        <p class="text-[9px] text-gray-500 mt-1.5 leading-relaxed">
+                            * 激进模式能匹配更多习惯，但极易与 Markdown 链接或 HTML 代码发生冲突误伤。
+                        </p>
+                    </div>
+
+                    <div class="pt-4 border-t border-white/5">
                         <h4 class="form-label text-gray-400">开发与测试</h4>
                         <button onclick="insertMockData()" class="btn-panel w-full bg-transparent border-dashed hover:bg-white/5 hover:text-white text-gray-400 border-white/10">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
@@ -340,20 +391,43 @@
     </div>
 
     <!-- Toast 提示 -->
-    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 bg-darkCard border border-white/10 text-white px-4 py-2 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] text-xs font-medium opacity-0 pointer-events-none transition-opacity z-[80] flex items-center gap-1.5">
+    <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 bg-darkCard border border-white/10 text-white px-4 py-2 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] text-xs font-medium opacity-0 pointer-events-none transition-transform transition-opacity z-[80] flex items-center gap-1.5 transform -translate-y-2">
         <span id="toastIcon"></span>
         <span id="toastMessage"></span>
     </div>
 
     <script>
+        // UUID Polyfill (安全上下文降级处理)
+        function generateUUID() {
+            if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                return crypto.randomUUID();
+            }
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // HTML 严格转义
+        const escapeHtml = (s) => {
+            if (s === null || s === undefined) return '';
+            return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+        };
+
         // ==========================================
-        // 0. 分类管理系统 (基于 localStorage)
+        // 0. 分类管理系统
         // ==========================================
         const DEFAULT_CATEGORIES = ['通用', 'UI/UX 视觉', '代码开发', '文案编辑'];
         
         function getCategories() {
             const saved = localStorage.getItem('PromptHub_Categories');
-            return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+            let cats = saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+            // QA 终极防守：如果系统兜底分类"通用"被用户通过 DevTools 强行删掉，则直接补回，防止数据变为无主孤儿。
+            if (!cats.includes('通用')) {
+                cats.unshift('通用');
+                saveCategories(cats);
+            }
+            return cats;
         }
 
         function saveCategories(cats) {
@@ -374,7 +448,7 @@
                 request.onupgradeneeded = (e) => {
                     const database = e.target.result;
                     if (!database.objectStoreNames.contains(STORE_NAME)) {
-                        database.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                        database.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true }); 
                     }
                 };
                 request.onsuccess = (e) => { db = e.target.result; resolve(db); };
@@ -420,21 +494,38 @@
             document.getElementById('toastIcon').innerHTML = type === 'success' 
                 ? '<svg class="w-3.5 h-3.5 text-neonCyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>'
                 : '<svg class="w-3.5 h-3.5 text-neonPink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-            toast.classList.remove('opacity-0', 'pointer-events-none');
-            toast.classList.add('animate-fade-in');
+            
+            toast.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
+            toast.classList.add('translate-y-0');
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => {
-                toast.classList.add('opacity-0', 'pointer-events-none');
-                toast.classList.remove('animate-fade-in');
-            }, 2000);
+                toast.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
+                toast.classList.remove('translate-y-0');
+            }, 2500);
         }
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 if (!document.getElementById('imageLightboxModal').classList.contains('opacity-0')) closeImageLightbox();
+                else if (!document.getElementById('variableModal').classList.contains('opacity-0')) closeVariableModal();
                 else if (!document.getElementById('confirmModal').classList.contains('opacity-0')) closeConfirmModal();
-                else if (!document.getElementById('addModal').classList.contains('opacity-0')) closeAddModal();
+                else if (!document.getElementById('addModal').classList.contains('opacity-0')) attemptCloseAddModal();
                 else if (!document.getElementById('settingsModal').classList.contains('opacity-0')) closeSettingsModal();
+            }
+            
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault(); 
+                const hint = document.getElementById('searchShortcutHint');
+                hint.classList.add('text-neonCyan', 'border-neonCyan');
+                setTimeout(() => hint.classList.remove('text-neonCyan', 'border-neonCyan'), 300);
+
+                const searchInput = document.getElementById('searchInput');
+                searchInput.focus();
+                if(searchInput.value) searchInput.select();
+            }
+
+            if (e.key === 'Enter' && !document.getElementById('variableModal').classList.contains('opacity-0')) {
+                executeVariableCopy();
             }
         });
 
@@ -460,12 +551,20 @@
         async function insertMockData() {
             const mockImgBase64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNDUwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNGRjAwN0EiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMwMEU1RkYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2cpIi8+PGNpcmNsZSBjeD0iNDAwIiBjeT0iMjI1IiByPSI4MCIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuMSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIzNiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VmlzdWFsIFJlZmVyZW5jZTwvdGV4dD48L3N2Zz4=";
             const mocks = [
-                { category: '通用', title: 'Midjourney 极简 Logo', content: 'Logo design, a futuristic letter "P" combined with an infinity symbol, minimalistic, neon cyan and hot pink gradient, dark background, vector art, high resolution, flat design --ar 1:1 --v 6.0', image: mockImgBase64, timestamp: Date.now() },
-                { category: '代码开发', title: 'React 瀑布流组件', content: '作为一名前端专家，请帮我用 React 和 TailwindCSS 实现一个纯 CSS 的瀑布流（Masonry）组件。\n\n要求：\n1. 不使用第三方库\n2. 使用 CSS column-count 实现自适应\n3. 卡片内包含图片和不确定长度的文字\n4. 重点解决卡片被截断（break-inside）的兼容性问题。', image: null, timestamp: Date.now() - 1000 },
-                { category: '文案编辑', title: 'NFT 项目发售推文', content: '帮我为即将发售的 "Neon Ape" NFT 系列写一条 Twitter 宣传文案。\n要求：语气要极具号召力和未来感，强调 "Free Mint"（免费铸造），包含 Call to action，加上相关标签（#NFT #Web3）。', image: null, timestamp: Date.now() - 2000 },
-                { category: 'UI/UX 视觉', title: '赛博朋克控制台', content: '请生成一个赛博朋克风格的后台管理系统界面，主色调为深色，带有霓虹粉和青色的点缀。需要包含侧边栏导航、顶部发光卡片面板和一个带有炫酷数据可视化的折线图。整体需要有玻璃拟态（Glassmorphism）质感。', image: null, timestamp: Date.now() - 3000 }
+                { id: generateUUID(), category: '通用', title: '智能翻译与解析模板', content: '你是一位精通多国语言的专家。请将以下文本翻译成 {{目标语言}}，并且用最通俗易懂的方式向我解释文本中包含的 {{重点解释领域}} 概念：\n\n文本内容：\n{{需要翻译的文本}}', image: null, timestamp: Date.now() + 1000, isFavorite: true },
+                { id: generateUUID(), category: '通用', title: 'Midjourney 极简 Logo', content: 'Logo design, a futuristic letter "P" combined with an infinity symbol, minimalistic, neon cyan and hot pink gradient, dark background, vector art, high resolution, flat design --ar 1:1 --v 6.0', image: mockImgBase64, timestamp: Date.now() },
+                { id: generateUUID(), category: '代码开发', title: 'React 瀑布流组件', content: '作为一名前端专家，请帮我用 React 和 TailwindCSS 实现一个纯 CSS 的瀑布流（Masonry）组件。\n\n要求：\n1. 不使用第三方库\n2. 使用 CSS column-count 实现自适应\n3. 卡片内包含图片和不确定长度的文字\n4. 重点解决卡片被截断（break-inside）的兼容性问题。', image: null, timestamp: Date.now() - 1000 },
+                { id: generateUUID(), category: '文案编辑', title: 'NFT 项目发售推文', content: '帮我为即将发售的 "Neon Ape" NFT 系列写一条 Twitter 宣传文案。\n要求：语气要极具号召力和未来感，强调 "Free Mint"（免费铸造），包含 Call to action，加上相关标签（#NFT #Web3）。', image: null, timestamp: Date.now() - 2000 },
+                { id: generateUUID(), category: 'UI/UX 视觉', title: '赛博朋克控制台', content: '请生成一个赛博朋克风格的后台管理系统界面，主色调为深色，带有霓虹粉和青色的点缀。需要包含侧边栏导航、顶部发光卡片面板和一个带有炫酷数据可视化的折线图。整体需要有玻璃拟态（Glassmorphism）质感。', image: null, timestamp: Date.now() - 3000 }
             ];
-            for (const m of mocks) await dbOps.add(m);
+            
+            const localCats = new Set(getCategories());
+            for (const m of mocks) {
+                if (m.category) localCats.add(m.category);
+                await dbOps.put(m); 
+            }
+            saveCategories(Array.from(localCats));
+            
             showToast('✅ 演示数据已注入成功！');
             closeSettingsModal();
             loadAndRenderList();
@@ -473,6 +572,16 @@
 
         // --- 核心表单弹窗 (支持 新建 / 编辑) ---
         let currentEditId = null;
+        let initialFormState = ''; 
+
+        function getFormStateSnapshot() {
+            return JSON.stringify({
+                c: document.getElementById('categorySelect').value,
+                t: document.getElementById('titleInput').value.trim(),
+                p: document.getElementById('contentInput').value.trim(),
+                i: currentImageBase64
+            });
+        }
 
         function openAddModal() {
             currentEditId = null; 
@@ -487,9 +596,20 @@
             const select = document.getElementById('categorySelect');
             const cats = getCategories();
             select.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            
+            if(activeCategory !== 'All' && activeCategory !== '⭐ 收藏') {
+                select.value = activeCategory;
+            }
+            
             document.getElementById('titleInput').value = '';
-            document.getElementById('contentInput').value = '';
+            
+            const contentEl = document.getElementById('contentInput');
+            contentEl.value = '';
+            contentEl.style.height = 'auto';
+            
             clearSelectedImage();
+            
+            initialFormState = getFormStateSnapshot();
             showFormModal();
         }
 
@@ -513,7 +633,14 @@
 
             document.getElementById('categorySelect').value = item.category || '通用';
             document.getElementById('titleInput').value = item.title || item.tag || '';
-            document.getElementById('contentInput').value = item.content || '';
+            
+            const contentEl = document.getElementById('contentInput');
+            contentEl.value = item.content || '';
+            
+            setTimeout(() => {
+                contentEl.style.height = 'auto';
+                contentEl.style.height = contentEl.scrollHeight + 'px';
+            }, 10);
 
             if (item.image) {
                 currentImageBase64 = item.image;
@@ -523,6 +650,8 @@
             } else {
                 clearSelectedImage();
             }
+            
+            initialFormState = getFormStateSnapshot();
             showFormModal();
         }
 
@@ -530,8 +659,29 @@
             const modal = document.getElementById('addModal');
             const content = document.getElementById('addModalContent');
             modal.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => content.classList.remove('scale-95'), 10);
+            // PM 修复 3: 将焦点延迟拉长到 100ms，保证低端设备完成重绘，彻底解决手机端软键盘被吃掉的 Bug
+            setTimeout(() => {
+                content.classList.remove('scale-95');
+                const titleInput = document.getElementById('titleInput');
+                const contentInput = document.getElementById('contentInput');
+                if (!titleInput.value) titleInput.focus();
+                else contentInput.focus();
+            }, 100);
             document.body.style.overflow = 'hidden';
+        }
+
+        function attemptCloseAddModal() {
+            const currentState = getFormStateSnapshot();
+            if (currentState !== initialFormState) {
+                openCustomConfirm(
+                    'Discard <span class="text-danger">Changes</span>', 
+                    '检测到未保存的更改，现在关闭将丢失这些内容，确认丢弃？', 
+                    '丢弃更改', 
+                    () => { closeAddModal(); }
+                );
+            } else {
+                closeAddModal();
+            }
         }
 
         function closeAddModal() {
@@ -548,16 +698,16 @@
         function openSettingsModal() {
             renderSettingsCategories();
             
-            // BYOK Sync 初始化: 从本地获取 Token 和 ID
             const tokenInput = document.getElementById('githubTokenInput');
             const gistInput = document.getElementById('gistIdInput');
+            const pwdInput = document.getElementById('syncPasswordInput');
+            
             tokenInput.value = localStorage.getItem('PromptHub_GithubToken') || '';
             gistInput.value = localStorage.getItem('PromptHub_GistId') || '';
+            pwdInput.value = localStorage.getItem('PromptHub_SyncPassword') || '';
             
-            tokenInput.addEventListener('change', (e) => localStorage.setItem('PromptHub_GithubToken', e.target.value.trim()));
-            gistInput.addEventListener('change', (e) => localStorage.setItem('PromptHub_GistId', e.target.value.trim()));
+            document.getElementById('varRegexSelect').value = localStorage.getItem('PromptHub_VarRegex') || 'safe';
 
-            // 每次打开默认重置到云端同步 Tab
             switchSettingsTab('sync');
 
             const modal = document.getElementById('settingsModal');
@@ -578,7 +728,6 @@
             loadAndRenderList();
         }
 
-        // 新增：设置面板的 Tab 切换逻辑
         function switchSettingsTab(tabName) {
             const tabs = ['sync', 'category', 'advanced'];
             tabs.forEach(name => {
@@ -596,30 +745,39 @@
                 list.innerHTML = `<div class="text-center text-gray-500 text-xs py-3">暂无分类数据</div>`;
                 return;
             }
-            list.innerHTML = cats.map((cat, index) => `
+            list.innerHTML = cats.map((cat, index) => {
+                const isDefault = cat === '通用';
+                // Dev 修复 1: 彻底防御单双引号破坏 DOM 结构的终极逃逸方案，防止双引号闭合 onclick 属性
+                const safeCatJs = escapeHtml(cat.replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
+                
+                return `
                 <div class="flex items-center justify-between p-2 hover:bg-white/5 rounded-lg group transition-colors">
-                    <span class="text-xs text-gray-300 ml-1 truncate flex-grow" id="cat-text-${index}">${escapeHtml(cat)}</span>
-                    <input type="text" class="hidden form-input px-2 py-1 text-xs w-full mr-2" id="cat-input-${index}" value="${escapeHtml(cat)}" />
+                    <span class="text-xs text-gray-300 ml-1 truncate flex-grow" id="cat-text-${index}">${escapeHtml(cat)} ${isDefault ? '<span class="text-[9px] bg-white/10 px-1 rounded ml-1 text-gray-500">System</span>' : ''}</span>
+                    <input type="text" class="hidden form-input px-2 py-1 text-xs w-full mr-2" id="cat-input-${index}" value="${escapeHtml(cat)}" 
+                        onkeydown="if(event.key === 'Enter') saveEditCategory(${index}, '${safeCatJs}'); if(event.key === 'Escape') cancelEditCategory(${index});" />
                     
+                    ${isDefault ? '' : `
                     <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" id="cat-actions-${index}">
                         <button onclick="startEditCategory(${index})" class="btn-icon-rounded p-1 hover:text-neonCyan hover:bg-neonCyan/10">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         </button>
-                        <button onclick="confirmDeleteCategory('${escapeHtml(cat)}')" class="btn-icon-rounded p-1 hover:text-danger hover:bg-danger/10">
+                        <button onclick="confirmDeleteCategory('${safeCatJs}')" class="btn-icon-rounded p-1 hover:text-danger hover:bg-danger/10">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                     </div>
 
                     <div class="hidden items-center gap-1 shrink-0" id="cat-save-actions-${index}">
-                        <button onclick="saveEditCategory(${index}, '${escapeHtml(cat)}')" class="btn-icon-rounded p-1 hover:text-green-400 hover:bg-green-400/10">
+                        <button onclick="saveEditCategory(${index}, '${safeCatJs}')" class="btn-icon-rounded p-1 hover:text-green-400 hover:bg-green-400/10">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         </button>
                         <button onclick="cancelEditCategory(${index})" class="btn-icon-rounded p-1 hover:text-gray-400 hover:bg-white/10">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </div>
+                    `}
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function addCategory() {
@@ -636,9 +794,11 @@
         }
 
         function confirmDeleteCategory(cat) {
+            if (cat === '通用') return showToast('系统保护分类无法删除', 'error');
+            
             openCustomConfirm(
                 'Delete <span class="text-danger">Category</span>', 
-                `确定删除分类 [${cat}] 吗？<br><br><span class="text-[10px] text-gray-500">注意：该分类下的提示词不会被删除，它们将被自动移入 [通用] 分类。</span>`, 
+                `确定删除分类 [${escapeHtml(cat)}] 吗？<br><br><span class="text-[10px] text-gray-500">注意：该分类下的提示词不会被删除，它们将被自动移入 [通用] 分类。</span>`, 
                 '删除分类', 
                 async () => {
                     let cats = getCategories();
@@ -682,6 +842,7 @@
             const input = document.getElementById(`cat-input-${index}`);
             const newCat = input.value.trim();
             if (!newCat || newCat === oldCat) return cancelEditCategory(index);
+            if (oldCat === '通用') return showToast('系统保护分类无法重命名', 'error');
             
             let cats = getCategories();
             if (cats.includes(newCat)) return showToast('该分类名已存在', 'error');
@@ -747,7 +908,10 @@
             if (confirmAction) await confirmAction();
         });
 
-        // --- 剪贴板 ---
+        // ==========================================
+        // 剪贴板与核心动态变量引擎 
+        // ==========================================
+        
         async function copyPromptText(text) {
             if (navigator.clipboard && window.isSecureContext) {
                 try {
@@ -767,13 +931,104 @@
             document.body.removeChild(textArea);
         }
 
+        let pendingVariableTemplate = ''; 
+        let pendingVariables = []; 
+
+        function getVariableRegex() {
+            const regexMode = localStorage.getItem('PromptHub_VarRegex') || 'safe';
+            if (regexMode === 'aggressive') {
+                return /\{\{([^}]+)\}\}|\[\[([^\]]+)\]\]|【([^】]+)】|\[([^\]]+)\]|<([^>]+)>/g;
+            }
+            return /\{\{([^}]+)\}\}|\[\[([^\]]+)\]\]|【([^】]+)】/g;
+        }
+
         async function copyPromptTextById(id) {
             try {
                 const records = await dbOps.getAll();
                 const item = records.find(r => r.id === id);
-                if (item && item.content) copyPromptText(item.content);
-                else showToast('找不到内容', 'error');
-            } catch (err) { showToast('读取异常', 'error'); }
+                if (!item || !item.content) return showToast('找不到内容', 'error');
+
+                const content = item.content;
+                const regex = getVariableRegex();
+
+                const matches = [...content.matchAll(regex)];
+                
+                if (matches.length > 0) {
+                    const uniqueVarsMap = new Map();
+                    matches.forEach(m => {
+                        const outerText = m[0]; 
+                        const innerText = m.slice(1).find(v => v !== undefined).trim(); 
+                        if(!uniqueVarsMap.has(outerText)) uniqueVarsMap.set(outerText, innerText);
+                    });
+                    
+                    openVariableModal(content, Array.from(uniqueVarsMap.entries()));
+                } else {
+                    copyPromptText(content);
+                }
+            } catch (err) { 
+                console.error(err);
+                showToast('读取异常', 'error'); 
+            }
+        }
+
+        function openVariableModal(template, varsArray) {
+            pendingVariableTemplate = template;
+            pendingVariables = varsArray.map(([outer, inner]) => ({outer, inner}));
+
+            const container = document.getElementById('variableInputsContainer');
+            
+            container.innerHTML = pendingVariables.map((v, index) => `
+                <div class="mb-3 animate-fade-in" style="animation-delay: ${index * 50}ms">
+                    <label class="form-label !text-neonCyan flex items-center justify-between">
+                        <span>${escapeHtml(v.inner)}</span>
+                        <span class="text-[9px] text-gray-500 normal-case tracking-normal font-mono bg-white/5 px-1 rounded">${escapeHtml(v.outer)}</span>
+                    </label>
+                    <input type="text" id="var-input-${index}" class="form-input px-3 py-2 border-neonCyan/20 focus:border-neonCyan" placeholder="输入内容 (留空则保持原样)..." onfocus="this.select()">
+                </div>
+            `).join('');
+            
+            const modal = document.getElementById('variableModal');
+            const content = document.getElementById('variableModalContent');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            
+            setTimeout(() => {
+                content.classList.remove('scale-95');
+                const firstInput = document.getElementById('var-input-0');
+                if(firstInput) firstInput.focus();
+            }, 100); // 同步将变量弹窗的 focus 延长至 100ms，确保移动端键盘响应
+            
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVariableModal() {
+            const modal = document.getElementById('variableModal');
+            const content = document.getElementById('variableModalContent');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                document.body.style.overflow = '';
+                pendingVariableTemplate = ''; 
+                document.getElementById('variableInputsContainer').innerHTML = '';
+            }, 200);
+        }
+
+        function executeVariableCopy() {
+            const inputs = document.querySelectorAll('#variableInputsContainer input');
+            const valueMap = new Map();
+            
+            inputs.forEach((input, index) => {
+                const outerText = pendingVariables[index].outer;
+                const val = input.value.trim() !== '' ? input.value : outerText; 
+                valueMap.set(outerText, val);
+            });
+            
+            const regex = getVariableRegex();
+            const finalString = pendingVariableTemplate.replace(regex, (match) => {
+                return valueMap.has(match) ? valueMap.get(match) : match;
+            });
+            
+            copyPromptText(finalString);
+            closeVariableModal();
         }
 
         async function toggleFavorite(id) {
@@ -793,72 +1048,126 @@
         }
 
         // ==========================================
-        // 3. 核心业务逻辑 (包含最新的云端同步功能)
+        // 3. 核心密码学与云端同步引擎 (AES-GCM + GitHub Gist)
         // ==========================================
+
+        const cryptoOps = {
+            async deriveKey(password, salt) {
+                const enc = new TextEncoder();
+                const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]);
+                return crypto.subtle.deriveKey(
+                    { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+                    keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+                );
+            },
+            bufferToBase64(buf) {
+                let binStr = ''; const bytes = new Uint8Array(buf); const len = bytes.byteLength;
+                for (let i = 0; i < len; i++) binStr += String.fromCharCode(bytes[i]);
+                return btoa(binStr);
+            },
+            base64ToBuffer(base64) {
+                const binStr = atob(base64); const len = binStr.length; const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) bytes[i] = binStr.charCodeAt(i);
+                return bytes;
+            },
+            async encrypt(text, password) {
+                const enc = new TextEncoder();
+                const salt = crypto.getRandomValues(new Uint8Array(16));
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const key = await this.deriveKey(password, salt);
+                const cipherBuffer = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, enc.encode(text));
+
+                const packed = new Uint8Array(16 + 12 + cipherBuffer.byteLength);
+                packed.set(salt, 0); packed.set(iv, 16); packed.set(new Uint8Array(cipherBuffer), 28);
+                return this.bufferToBase64(packed);
+            },
+            async decrypt(base64, password) {
+                const packed = this.base64ToBuffer(base64);
+                const salt = packed.slice(0, 16);
+                const iv = packed.slice(16, 28);
+                const cipherBytes = packed.slice(28);
+
+                const key = await this.deriveKey(password, salt);
+                try {
+                    const decBuffer = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, cipherBytes);
+                    return new TextDecoder().decode(decBuffer);
+                } catch (e) {
+                    throw new Error('解密失败：密码错误或数据已损坏');
+                }
+            }
+        };
         
-        // --- BYOK GitHub Gist 云端同步逻辑 ---
         async function pushToCloud() {
             const token = localStorage.getItem('PromptHub_GithubToken');
             let gistId = localStorage.getItem('PromptHub_GistId');
+            const syncPwd = document.getElementById('syncPasswordInput').value.trim();
             
-            if (!token) {
-                return showToast('请先填写您的 GitHub Token', 'error');
-            }
+            if (!token) return showToast('请先填写您的 GitHub Token', 'error');
+
+            const btn = document.getElementById('btn-push-sync');
+            const origText = btn.innerHTML;
+            btn.innerHTML = '↑ 同步中...';
+            btn.disabled = true;
 
             try {
-                showToast('🚀 正在打包数据，推送到云端...');
+                showToast(syncPwd ? '🔐 正在加密并推送至云端...' : '🚀 正在推送至云端...');
                 const prompts = await dbOps.getAll();
                 const categories = getCategories();
                 
-                // 将本地的提示词和分类合并打包成 JSON
-                const syncPayload = JSON.stringify({ prompts, categories }, null, 2);
+                let rawPayload = JSON.stringify({ prompts, categories });
+                let finalPayload;
+
+                if (syncPwd) {
+                    const encryptedStr = await cryptoOps.encrypt(rawPayload, syncPwd);
+                    finalPayload = JSON.stringify({ encrypted: true, data: encryptedStr }, null, 2);
+                } else {
+                    finalPayload = JSON.stringify({ encrypted: false, data: JSON.parse(rawPayload) }, null, 2);
+                }
                 
                 const body = {
                     description: "PromptHub Cloud Sync Backup (BYOK)",
-                    public: false, // 绝对保护隐私，存为私有 Gist
-                    files: { "prompthub_sync_data.json": { content: syncPayload } }
+                    public: false, 
+                    files: { "prompthub_sync_data.json": { content: finalPayload } }
                 };
 
                 let url = 'https://api.github.com/gists';
-                let method = 'POST'; // 默认新建
-                
-                if (gistId) {
-                    url += `/${gistId}`;
-                    method = 'PATCH'; // 如果已有 ID，则做增量更新覆盖
-                }
+                let method = 'POST'; 
+                if (gistId) { url += `/${gistId}`; method = 'PATCH'; }
 
                 const res = await fetch(url, {
                     method,
-                    headers: { 
-                        'Authorization': `token ${token}`, 
-                        'Accept': 'application/vnd.github.v3+json' 
-                    },
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' },
                     body: JSON.stringify(body)
                 });
 
                 if (!res.ok) throw new Error('API Request Failed');
                 const data = await res.json();
                 
-                // 首次推送成功后，自动保存返回的 Gist ID
                 if (!gistId) {
                     localStorage.setItem('PromptHub_GistId', data.id);
                     document.getElementById('gistIdInput').value = data.id;
                 }
-                
-                showToast('✨ 云端同步成功！已覆盖最新数据');
+                showToast(syncPwd ? '✨ 端到端加密同步成功！' : '✨ 云端同步成功！');
             } catch (err) { 
                 console.error(err);
-                showToast('❌ 推送失败，请检查 Token 或网络状态', 'error'); 
+                showToast('❌ 推送失败，请检查 Token', 'error'); 
+            } finally {
+                btn.innerHTML = origText;
+                btn.disabled = false;
             }
         }
 
         async function pullFromCloud() {
             const token = localStorage.getItem('PromptHub_GithubToken');
             const gistId = localStorage.getItem('PromptHub_GistId');
+            const syncPwd = document.getElementById('syncPasswordInput').value.trim();
             
-            if (!token || !gistId) {
-                return showToast('请确保 Token 和 Gist ID 均已填写', 'error');
-            }
+            if (!token || !gistId) return showToast('请确保 Token 和 Gist ID 均已填写', 'error');
+
+            const btn = document.getElementById('btn-pull-sync');
+            const origText = btn.innerHTML;
+            btn.innerHTML = '↓ 拉取中...';
+            btn.disabled = true;
 
             try {
                 showToast('📥 正在从云端拉取数据...');
@@ -867,37 +1176,50 @@
                 });
                 
                 if (!res.ok) throw new Error('API Request Failed');
-                
                 const data = await res.json();
                 const file = data.files['prompthub_sync_data.json'];
                 if (!file) throw new Error('云端找不到有效的数据文件');
 
-                const parsedData = JSON.parse(file.content);
-                
+                const wrapperData = JSON.parse(file.content);
+                let parsedData;
+
+                if (wrapperData.encrypted) {
+                    if (!syncPwd) throw new Error('云端数据已加密，请先在设置中输入密码');
+                    showToast('🔓 正在进行本地解密...');
+                    const decryptedStr = await cryptoOps.decrypt(wrapperData.data, syncPwd);
+                    parsedData = JSON.parse(decryptedStr); 
+                } else {
+                    parsedData = wrapperData.data || wrapperData;
+                }
+
                 let importedPrompts = 0;
-                // 1. 合并提示词数据
+                let localCats = new Set(getCategories());
+
                 if (parsedData.prompts && Array.isArray(parsedData.prompts)) {
                     for (const item of parsedData.prompts) {
-                        await dbOps.put(item); // 智能合并：有相同ID则覆盖，没有则新建
+                        if(!item.id) item.id = generateUUID();
+                        if (item.category) localCats.add(item.category);
+                        await dbOps.put(item);
                         importedPrompts++;
                     }
                 }
                 
-                // 2. 合并分类数据
                 if (parsedData.categories && Array.isArray(parsedData.categories)) {
-                    let localCats = getCategories();
-                    const mergedCats = [...new Set([...localCats, ...parsedData.categories])];
-                    saveCategories(mergedCats);
+                    parsedData.categories.forEach(c => localCats.add(c));
                 }
-
-                showToast(`✨ 合并完成！更新了 ${importedPrompts} 条云端记录`);
                 
-                // 重新渲染UI
+                saveCategories(Array.from(localCats));
+
+                showToast(`✨ 合并完成！安全更新 ${importedPrompts} 条记录`);
                 renderSettingsCategories();
                 loadAndRenderList();
             } catch(e) { 
                 console.error(e);
-                showToast('❌ 拉取失败，请检查 Gist ID 或网络状态', 'error'); 
+                const msg = e.message.includes('密码') ? e.message : '拉取失败，请检查 Gist ID 或网络';
+                showToast(`❌ ${msg}`, 'error'); 
+            } finally {
+                btn.innerHTML = origText;
+                btn.disabled = false;
             }
         }
 
@@ -905,24 +1227,24 @@
 
         function processImageFile(file) {
             document.getElementById('uploadTip').innerText = "处理压缩中...";
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (event) => {
-                const img = new Image(); img.src = event.target.result;
-                img.onload = () => {
-                    const maxWidth = 1024; let { width, height } = img;
-                    if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width; canvas.height = height;
-                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                    currentImageBase64 = canvas.toDataURL('image/webp', 0.8);
-                    
-                    document.getElementById('previewImg').src = currentImageBase64;
-                    document.getElementById('uploadZone').classList.add('hidden');
-                    document.getElementById('previewWrapper').classList.remove('hidden');
-                    document.getElementById('uploadTip').innerText = "点击或粘贴截图";
-                };
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            
+            img.onload = () => {
+                URL.revokeObjectURL(objectUrl); 
+                const maxWidth = 1024; let { width, height } = img;
+                if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+                const canvas = document.createElement('canvas');
+                canvas.width = width; canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                currentImageBase64 = canvas.toDataURL('image/webp', 0.8);
+                
+                document.getElementById('previewImg').src = currentImageBase64;
+                document.getElementById('uploadZone').classList.add('hidden');
+                document.getElementById('previewWrapper').classList.remove('hidden');
+                document.getElementById('uploadTip').innerText = "点击或粘贴截图";
             };
+            img.src = objectUrl;
         }
 
         document.getElementById('imageInput').addEventListener('change', async (e) => {
@@ -932,15 +1254,20 @@
 
         document.addEventListener('paste', (e) => {
             const addModal = document.getElementById('addModal');
-            if (addModal.classList.contains('opacity-0')) return;
+            const isModalClosed = addModal.classList.contains('opacity-0');
 
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
             for (let index in items) {
                 const item = items[index];
                 if (item.kind === 'file' && item.type.startsWith('image/')) {
                     const file = item.getAsFile();
+                    
+                    if (isModalClosed) {
+                        openAddModal();
+                    }
+                    
                     processImageFile(file);
-                    showToast('识别到剪贴板图片');
+                    showToast('识别到剪贴板图片，已开启新建');
                     e.preventDefault();
                     break; 
                 }
@@ -968,6 +1295,7 @@
                 await dbOps.put(payload);
                 showToast('修改已保存');
             } else {
+                payload.id = generateUUID(); 
                 await dbOps.add(payload);
                 showToast('已保存至本地库');
             }
@@ -976,7 +1304,24 @@
             loadAndRenderList();
         }
 
-        document.getElementById('searchInput').addEventListener('input', () => loadAndRenderList());
+        let searchDebounceTimer;
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const hasValue = !!e.target.value.trim();
+            document.getElementById('clearSearchBtn').classList.toggle('hidden', !hasValue);
+            
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+                loadAndRenderList();
+            }, 300); 
+        });
+
+        function clearSearch() {
+            const input = document.getElementById('searchInput');
+            input.value = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            loadAndRenderList();
+            input.focus();
+        }
 
         async function exportData() {
             try {
@@ -1004,15 +1349,20 @@
                     if (!Array.isArray(data)) throw new Error("Format error");
                     
                     let importedCount = 0;
+                    let localCats = new Set(getCategories());
+                    
                     for (const item of data) {
-                        if (item.id) delete item.id;
+                        if (!item.id) item.id = generateUUID();
                         if (item.content) {
                             if (!item.timestamp) item.timestamp = Date.now();
-                            await dbOps.add(item);
+                            if (item.category) localCats.add(item.category);
+                            await dbOps.put(item); 
                             importedCount++;
                         }
                     }
-                    if(importedCount > 0) showToast(`导入成功 (追加 ${importedCount} 条记录)`);
+                    saveCategories(Array.from(localCats));
+                    
+                    if(importedCount > 0) showToast(`导入成功 (同步 ${importedCount} 条记录)`);
                     else showToast('文件中未发现有效数据', 'error');
                     
                     document.getElementById('importInput').value = ''; 
@@ -1028,11 +1378,6 @@
         // ==========================================
         // 4. 瀑布流渲染与搜索过滤
         // ==========================================
-        const escapeHtml = (s) => {
-            if (s === null || s === undefined) return '';
-            return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-        };
-
         let activeCategory = 'All';
 
         function renderCategoryTabs() {
@@ -1053,7 +1398,7 @@
                     activeClass = 'bg-yellow-400/10 text-yellow-400 border-yellow-400/50 shadow-[0_0_8px_rgba(250,204,21,0.2)]';
                 }
                 
-                const safeTag = tag.replace(/'/g, "\\'"); 
+                const safeTag = escapeHtml(tag.replace(/\\/g, '\\\\').replace(/'/g, "\\'")); 
                 return `<button onclick="setActiveCategory('${safeTag}')" class="px-3 py-1 rounded-full text-[11px] font-medium border transition-all whitespace-nowrap ${activeClass}">${label}</button>`;
             }).join('');
         }
@@ -1094,11 +1439,18 @@
                 statTotal.innerText = records.length;
 
                 if (records.length === 0) {
+                    let emptyMsg = '库中暂无数据，请新建或在设置中注入演示数据。';
+                    if (searchQuery) {
+                        emptyMsg = `未找到包含 "<span class="text-neonCyan">${escapeHtml(searchQuery)}</span>" 的记录。<br><button onclick="clearSearch()" class="mt-4 px-4 py-1.5 bg-neonPink/10 text-neonPink border border-neonPink/30 rounded-full hover:bg-neonPink/20 transition-colors text-[11px] font-bold">清空搜索条件</button>`;
+                    } else if (activeCategory === '⭐ 收藏') {
+                        emptyMsg = '暂无星标收藏，去列表中点亮星星吧！';
+                    } else if (activeCategory !== 'All') {
+                        emptyMsg = `[${escapeHtml(activeCategory)}] 分类下暂无内容。`;
+                    }
+
                     listContainer.innerHTML = `
-                        <div style="column-span: all;" class="w-full flex justify-center py-20">
-                            <span class="text-gray-500 text-xs tracking-wide text-center">
-                                ${searchQuery || activeCategory !== 'All' ? '未找到匹配记录，尝试更换检索词。' : '库中暂无数据，请新建或在设置中注入演示数据。'}
-                            </span>
+                        <div style="column-span: all;" class="w-full flex flex-col items-center justify-center py-20">
+                            <span class="text-gray-500 text-xs tracking-wide text-center leading-relaxed">${emptyMsg}</span>
                         </div>`;
                     return;
                 }
@@ -1119,10 +1471,10 @@
                             
                             <div class="p-4 flex-grow flex flex-col">
                                 <div class="flex items-center justify-between mb-2">
-                                    <span class="badge-neon">
+                                    <span class="badge-neon inline-block max-w-[140px] truncate" title="${escapeHtml(displayCat)}">
                                         ${escapeHtml(displayCat)}
                                     </span>
-                                    <span class="text-[9px] text-gray-500 font-mono">
+                                    <span class="text-[9px] text-gray-500 font-mono shrink-0">
                                         ${new Date(item.timestamp).toLocaleDateString()}
                                     </span>
                                 </div>
@@ -1132,19 +1484,19 @@
                                 <div class="scroll-mask whitespace-pre-wrap text-xs text-gray-300 font-mono leading-relaxed bg-[#0B0B15] p-3 rounded-lg border border-white/5 max-h-32 overflow-y-auto no-scrollbar mb-3 relative flex-grow" id="content-${item.id}">${escapeHtml(item.content)}</div>
                                 
                                 <div class="flex items-center gap-1.5 mt-auto pt-2 border-t border-white/5">
-                                    <button onclick="copyPromptTextById(${item.id})" class="flex-1 btn-card-action hover:text-white hover:bg-white/10 text-[11px] font-bold py-2 gap-1.5 text-white" title="复制">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                    <button onclick="copyPromptTextById('${item.id}')" class="flex-1 btn-card-action hover:text-white hover:bg-white/10 text-[11px] font-bold py-2 gap-1.5 text-gray-300 transition-colors" title="复制">
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                                         Copy
                                     </button>
                                     
-                                    <button onclick="toggleFavorite(${item.id})" class="w-8 h-8 btn-card-action shrink-0 ${item.isFavorite ? 'text-yellow-400 bg-yellow-400/10 border-yellow-400/30' : 'hover:text-yellow-400 hover:bg-yellow-400/10 hover:border-yellow-400/30'}" title="${item.isFavorite ? '取消收藏' : '加入收藏'}">
+                                    <button onclick="toggleFavorite('${item.id}')" class="w-8 h-8 btn-card-action shrink-0 ${item.isFavorite ? 'text-yellow-400 bg-yellow-400/10 border-yellow-400/30' : 'hover:text-yellow-400 hover:bg-yellow-400/10 hover:border-yellow-400/30'}" title="${item.isFavorite ? '取消收藏' : '加入收藏'}">
                                         <svg class="w-4 h-4" fill="${item.isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
                                     </button>
 
-                                    <button onclick="openEditModal(${item.id})" class="w-8 h-8 btn-card-action hover:text-white hover:bg-neonCyan/20 hover:border-neonCyan/50 shrink-0" title="编辑">
+                                    <button onclick="openEditModal('${item.id}')" class="w-8 h-8 btn-card-action hover:text-white hover:bg-neonCyan/20 hover:border-neonCyan/50 shrink-0" title="编辑">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
-                                    <button onclick="openConfirmModal(${item.id})" class="w-8 h-8 btn-card-action hover:text-white hover:bg-danger/20 hover:border-danger/50 shrink-0" title="删除">
+                                    <button onclick="openConfirmModal('${item.id}')" class="w-8 h-8 btn-card-action hover:text-white hover:bg-danger/20 hover:border-danger/50 shrink-0" title="删除">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 </div>
