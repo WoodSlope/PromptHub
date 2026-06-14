@@ -182,7 +182,6 @@
             
             <div class="flex items-center gap-3 mb-5" id="formModalHeader"></div>
             
-            <!-- V8 Rule: md:items-start 防止由于右侧文本域自适应撑高导致左侧图片框变形 -->
             <div class="flex flex-col md:flex-row gap-5 mb-5 md:items-start">
                 <div class="w-full md:w-5/12 flex flex-col gap-4">
                     <div>
@@ -194,7 +193,6 @@
                             <span>标题</span>
                             <span class="text-[9px] text-neonCyan font-normal normal-case"><span class="font-mono">{{变量}}</span> 支持动态填空</span>
                         </label>
-                        <!-- V8 Rule: onfocus="this.select()" 满足完美键盘聚焦的全选要求 -->
                         <input type="text" id="titleInput" placeholder="一句话描述用途" class="form-input px-3 py-2.5" onfocus="this.select()">
                     </div>
                     
@@ -213,7 +211,6 @@
 
                         <div id="previewWrapper" class="hidden relative group w-full h-[160px]">
                             <img id="previewImg" src="" class="w-full h-full object-cover rounded-lg border border-white/10">
-                            <!-- Mobile UX Fix: 移动端默认显示删除按钮层，PC端保留 Hover 显影体验 -->
                             <div class="absolute inset-0 bg-black/50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center backdrop-blur-sm">
                                 <button onclick="clearSelectedImage()" class="btn-icon-rounded text-white bg-danger hover:bg-red-600 shadow-lg transform scale-90 md:group-hover:scale-100 shrink-0">
                                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -225,12 +222,10 @@
 
                 <div class="w-full md:w-7/12 flex flex-col h-full">
                     <label class="form-label">内容 <span class="text-neonPink">*</span></label>
-                    <!-- V8 Rule: 动态文本域：Textarea 必须高度自适应。配合限制最高高度防止布局溢出 -->
                     <textarea id="contentInput" placeholder="描述你希望 AI 做什么... 可以包含 {{你的变量}} 实现点击复制时动态填空。" class="form-input px-3 py-2.5 w-full resize-none leading-relaxed min-h-[200px] max-h-[50vh] overflow-y-auto" oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'"></textarea>
                 </div>
             </div>
 
-            <!-- Fix: 修复相互冲突的 padding 类，使用 mt-2 拉开内边距 -->
             <div class="flex gap-3 mt-2 pt-4 border-t border-white/5">
                 <button onclick="attemptCloseAddModal()" class="btn-ghost flex-1 border border-white/10 hover:bg-white/10">取消编辑</button>
                 <button id="formSubmitBtn" onclick="savePrompt()" class="btn-primary flex-[2]"></button>
@@ -270,14 +265,12 @@
                 <h3 class="text-lg font-bold text-white tracking-tight">Global <span class="text-neonPink">Settings</span></h3>
             </div>
 
-            <!-- Tab 导航 -->
             <div class="flex border-b border-white/10 mb-5">
                 <button onclick="switchSettingsTab('sync')" id="tab-btn-sync" class="flex-1 py-2.5 text-xs font-bold text-neonCyan border-b-2 border-neonCyan transition-colors">云端与备份</button>
                 <button onclick="switchSettingsTab('category')" id="tab-btn-category" class="flex-1 py-2.5 text-xs font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-300 transition-colors">分类管理</button>
                 <button onclick="switchSettingsTab('advanced')" id="tab-btn-advanced" class="flex-1 py-2.5 text-xs font-bold text-gray-500 border-b-2 border-transparent hover:text-gray-300 transition-colors">高级</button>
             </div>
             
-            <!-- V8 Rule: Tab 内容区块加入安全边界 max-h-[55vh] 和内部滚动，防止设置项过多撑爆屏幕 -->
             <div class="relative min-h-[300px] max-h-[55vh] overflow-y-auto overflow-x-hidden pr-2 no-scrollbar">
                 
                 <!-- 1. 云端与备份 Tab -->
@@ -308,7 +301,7 @@
                                 </button>
                             </div>
                             <p class="text-[9px] text-gray-500 leading-relaxed">
-                                * <a href="https://github.com/settings/tokens/new?scopes=gist&description=PromptHub%20Sync" target="_blank" class="text-neonCyan hover:underline">点击获取 Token</a>。若设置了加密密码，云端将仅存储 AES-GCM 乱码密文。
+                                * <a href="https://github.com/settings/tokens/new?scopes=gist&description=PromptHub%20Sync" target="_blank" class="text-neonCyan hover:underline">点击获取 Token</a>。若设置了加密密码，云端将仅存储 AES-GCM 乱码密文。当数据超过 1MB 时会自动剥离图片以确保文本同步。
                             </p>
                         </div>
                     </div>
@@ -358,7 +351,6 @@
                     
                     <div class="pt-4 border-t border-danger/20">
                         <h4 class="form-label text-danger">危险操作</h4>
-                        <!-- V8 Rule: 优雅防呆，自定义 Danger Modal -->
                         <button onclick="openCustomConfirm('Clear <span class=\'text-danger\'>All Data</span>', '警告：此操作将清空本地所有提示词数据且不可恢复！是否继续？', '一键清空', async () => { await dbOps.clearAll(); showToast('本地库已完全清空'); loadAndRenderList(); closeSettingsModal(); })" class="btn-panel w-full bg-danger/10 hover:bg-danger/20 text-danger border-danger/20 hover:border-danger/50 font-bold tracking-wide">
                             <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             一键清空本地库
@@ -387,7 +379,6 @@
     </div>
 
     <!-- ================= 全屏图片预览灯箱 ================= -->
-    <!-- V8 Rule: 内建灯箱，禁止 window.open -->
     <div id="imageLightboxModal" onclick="if(event.target === this) closeImageLightbox()" class="fixed inset-0 bg-black/95 backdrop-blur-md z-[70] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 p-4 sm:p-10 cursor-zoom-out">
         <button onclick="closeImageLightbox()" class="btn-icon-rounded absolute top-4 right-4 z-10 bg-black/50 hover:bg-black text-white shrink-0"><svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
         <img id="lightboxImg" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl transform scale-95 transition-transform duration-300 pointer-events-none" />
@@ -400,7 +391,6 @@
     </div>
 
     <script>
-        // V8 Rule 1: 拒绝自增 ID，手写 UUID Polyfill 防御非安全上下文失效
         function generateUUID() {
             if (typeof crypto !== 'undefined' && crypto.randomUUID) {
                 return crypto.randomUUID();
@@ -411,7 +401,6 @@
             });
         }
 
-        // HTML 严格转义
         const escapeHtml = (s) => {
             if (s === null || s === undefined) return '';
             return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
@@ -425,7 +414,6 @@
         function getCategories() {
             const saved = localStorage.getItem('PromptHub_Categories');
             let cats = saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
-            // V8 Rule 1: 孤儿数据防御 (兜底恢复机制)
             if (!cats.includes('通用')) {
                 cats.unshift('通用');
                 saveCategories(cats);
@@ -450,7 +438,6 @@
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
                 request.onupgradeneeded = (e) => {
                     const database = e.target.result;
-                    // 使用 keyPath id 为主键，彻底抛弃 autoincrement 
                     if (!database.objectStoreNames.contains(STORE_NAME)) {
                         database.createObjectStore(STORE_NAME, { keyPath: 'id' }); 
                     }
@@ -492,12 +479,20 @@
         // 2. 交互逻辑 (Toast, Modals, 快捷键)
         // ==========================================
         let toastTimeout;
+        // Fix: 扩展 showToast 支持 warning 状态
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             document.getElementById('toastMessage').innerText = message;
-            document.getElementById('toastIcon').innerHTML = type === 'success' 
-                ? '<svg class="w-3.5 h-3.5 text-neonCyan shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>'
-                : '<svg class="w-3.5 h-3.5 text-neonPink shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            
+            let iconHtml = '';
+            if (type === 'success') {
+                iconHtml = '<svg class="w-3.5 h-3.5 text-neonCyan shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>';
+            } else if (type === 'warning') {
+                iconHtml = '<svg class="w-3.5 h-3.5 text-yellow-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+            } else {
+                iconHtml = '<svg class="w-3.5 h-3.5 text-neonPink shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            }
+            document.getElementById('toastIcon').innerHTML = iconHtml;
             
             toast.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
             toast.classList.add('translate-y-0');
@@ -505,7 +500,7 @@
             toastTimeout = setTimeout(() => {
                 toast.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
                 toast.classList.remove('translate-y-0');
-            }, 2500);
+            }, 3500); // warning 提示适当延长停留时间
         }
 
         document.addEventListener('keydown', (e) => {
@@ -597,7 +592,6 @@
             `;
             const submitBtn = document.getElementById('formSubmitBtn');
             submitBtn.innerText = "保存至本地库";
-            // Concurrency Fix: 每次开启弹窗必须重置按钮锁定状态
             submitBtn.disabled = false;
             submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
 
@@ -613,7 +607,7 @@
             
             const contentEl = document.getElementById('contentInput');
             contentEl.value = '';
-            contentEl.style.height = 'auto'; // Reset on new
+            contentEl.style.height = 'auto'; 
             
             clearSelectedImage();
             
@@ -631,7 +625,6 @@
             `;
             const submitBtn = document.getElementById('formSubmitBtn');
             submitBtn.innerText = "保存修改";
-            // Concurrency Fix: 重置按钮状态
             submitBtn.disabled = false;
             submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
 
@@ -649,7 +642,6 @@
             const contentEl = document.getElementById('contentInput');
             contentEl.value = item.content || '';
             
-            // V8 Rule 2: 动态文本域初始赋值后必须强制触发一次高度重算
             setTimeout(() => {
                 contentEl.style.height = 'auto';
                 contentEl.style.height = contentEl.scrollHeight + 'px';
@@ -673,7 +665,6 @@
             const content = document.getElementById('addModalContent');
             modal.classList.remove('opacity-0', 'pointer-events-none');
             
-            // V8 Rule 2: 完美键盘聚焦，必须延迟 100ms
             setTimeout(() => {
                 content.classList.remove('scale-95');
                 const titleInput = document.getElementById('titleInput');
@@ -686,7 +677,6 @@
 
         function attemptCloseAddModal() {
             const currentState = getFormStateSnapshot();
-            // V8 Rule 2: 表单脏检查 (Dirty Check)，有修改必须拦截
             if (currentState !== initialFormState) {
                 openCustomConfirm(
                     'Discard <span class="text-danger">Changes</span>', 
@@ -762,7 +752,6 @@
             }
             list.innerHTML = cats.map((cat, index) => {
                 const isDefault = cat === '通用';
-                // V8 Rule 4: 双重 DOM 注入清洗，严防 JS 语法错误或闭合注入
                 const safeCatJs = escapeHtml(cat.replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
                 
                 return `
@@ -899,7 +888,6 @@
         }
 
         function openConfirmModal(id) {
-            // V8 Rule 4: 危险删除操作自定义 Danger Modal
             openCustomConfirm(
                 'Confirm <span class="text-danger">Delete</span>', 
                 '此操作将从数据库中永久销毁该记录，确认继续？', 
@@ -1007,7 +995,6 @@
             const content = document.getElementById('variableModalContent');
             modal.classList.remove('opacity-0', 'pointer-events-none');
             
-            // V8 Rule 2: 延迟确保焦点正确挂载
             setTimeout(() => {
                 content.classList.remove('scale-95');
                 const firstInput = document.getElementById('var-input-0');
@@ -1041,7 +1028,6 @@
             
             const regex = getVariableRegex();
             
-            // V8 Rule 4: 单次遍历正则替换，防连环污染
             const finalString = pendingVariableTemplate.replace(regex, (match) => {
                 return valueMap.has(match) ? valueMap.get(match) : match;
             });
@@ -1071,7 +1057,6 @@
         // ==========================================
 
         const cryptoOps = {
-            // V8 Rule 1: 原生 window.crypto.subtle 实现 E2EE
             async deriveKey(password, salt) {
                 const enc = new TextEncoder();
                 const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]);
@@ -1130,11 +1115,26 @@
             btn.disabled = true;
 
             try {
-                showToast(syncPwd ? '🔐 正在加密并推送至云端...' : '🚀 正在推送至云端...');
-                const prompts = await dbOps.getAll();
+                let prompts = await dbOps.getAll();
                 const categories = getCategories();
                 
                 let rawPayload = JSON.stringify({ prompts, categories });
+                
+                // Fix: 探测体积并优雅降级剥离图片。700KB 作为硬边界，确保加上加密膨胀后绝不超过 1MB
+                const byteSize = new Blob([rawPayload]).size;
+                const MAX_GIST_SIZE = 700 * 1024; 
+                
+                let didFallback = false;
+                if (byteSize > MAX_GIST_SIZE) {
+                    didFallback = true;
+                    showToast('⚠️ 数据超限，自动降级为纯文本模式以保障同步...', 'warning');
+                    // 断臂求生，剥离图片
+                    prompts = prompts.map(p => ({ ...p, image: null }));
+                    rawPayload = JSON.stringify({ prompts, categories });
+                } else {
+                    showToast(syncPwd ? '🔐 正在加密并推送至云端...' : '🚀 正在推送至云端...');
+                }
+
                 let finalPayload;
 
                 if (syncPwd) {
@@ -1167,7 +1167,7 @@
                     localStorage.setItem('PromptHub_GistId', data.id);
                     document.getElementById('gistIdInput').value = data.id;
                 }
-                showToast(syncPwd ? '✨ 端到端加密同步成功！' : '✨ 云端同步成功！');
+                if (!didFallback) showToast(syncPwd ? '✨ 端到端加密同步成功！' : '✨ 云端同步成功！');
             } catch (err) { 
                 console.error(err);
                 showToast('❌ 推送失败，请检查 Token', 'error'); 
@@ -1215,10 +1215,21 @@
                 let importedPrompts = 0;
                 let localCats = new Set(getCategories());
 
+                // Fix: 在合并前，提取出本地的已有记录，构建冲突防御地图 (Local Asset Shield)
+                const existingRecords = await dbOps.getAll();
+                const existingMap = new Map(existingRecords.map(r => [r.id, r]));
+
                 if (parsedData.prompts && Array.isArray(parsedData.prompts)) {
                     for (const item of parsedData.prompts) {
                         if(!item.id) item.id = generateUUID();
                         if (item.category) localCats.add(item.category);
+                        
+                        // 核心保护：如果云端被降级失去了图片，但本地拥有图片，则反向继承本地资产，拒绝恶意覆盖
+                        const localItem = existingMap.get(item.id);
+                        if (localItem && localItem.image && !item.image) {
+                            item.image = localItem.image;
+                        }
+
                         await dbOps.put(item);
                         importedPrompts++;
                     }
@@ -1249,11 +1260,10 @@
             document.getElementById('uploadTip').innerText = "处理压缩中...";
             const img = new Image();
             
-            // V8 Rule 1: 防止内存泄漏，创建 ObjectURL 必须 revoke
             const objectUrl = URL.createObjectURL(file);
             
             img.onload = () => {
-                URL.revokeObjectURL(objectUrl); // 及时释放
+                URL.revokeObjectURL(objectUrl); 
                 const maxWidth = 1024; let { width, height } = img;
                 if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
                 const canvas = document.createElement('canvas');
@@ -1274,14 +1284,12 @@
             if (file) processImageFile(file);
         });
 
-        // V8 Rule 2: 全局级剪贴板截图侦听，提供无缝 Aha-Moment
         document.addEventListener('paste', (e) => {
             const addModal = document.getElementById('addModal');
             const isModalClosed = addModal.classList.contains('opacity-0');
 
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
             
-            // QA Fix: 弃用危险的 for...in，改为标准 for 循环阻断原型链污染导致的崩溃
             for (let i = 0; i < items.length; i++) {
                 const item = items[i];
                 if (item.kind === 'file' && item.type.startsWith('image/')) {
@@ -1313,7 +1321,6 @@
 
             if (!content) return showToast('Prompt 内容为必填', 'error');
 
-            // Concurrency Fix: 锁定按钮，防爆破狂点插入脏数据
             const btn = document.getElementById('formSubmitBtn');
             if (btn.disabled) return;
             btn.disabled = true;
@@ -1358,7 +1365,6 @@
             const hasValue = !!e.target.value.trim();
             document.getElementById('clearSearchBtn').classList.toggle('hidden', !hasValue);
             
-            // V8 Rule 4: 高频搜索 300ms 强制防抖防性能损耗
             clearTimeout(searchDebounceTimer);
             searchDebounceTimer = setTimeout(() => {
                 loadAndRenderList();
@@ -1402,11 +1408,9 @@
                     let localCats = new Set(getCategories());
                     
                     for (const item of data) {
-                        // 强制覆盖补全 UUID
                         if (!item.id) item.id = generateUUID();
                         if (item.content) {
                             if (!item.timestamp) item.timestamp = Date.now();
-                            // V8 Rule 1: 自动提取并注册外部特有标签
                             if (item.category) localCats.add(item.category);
                             await dbOps.put(item); 
                             importedCount++;
@@ -1491,7 +1495,6 @@
                 statTotal.innerText = records.length;
 
                 if (records.length === 0) {
-                    // V8 Rule 3: 搜索无结果时带上当前词汇和高亮清除按钮打通死胡同
                     let emptyMsg = '库中暂无数据，请新建或在设置中注入演示数据。';
                     if (searchQuery) {
                         emptyMsg = `未找到包含 "<span class="text-neonCyan">${escapeHtml(searchQuery)}</span>" 的记录。<br><button onclick="clearSearch()" class="mt-4 px-4 py-1.5 bg-neonPink/10 text-neonPink border border-neonPink/30 rounded-full hover:bg-neonPink/20 transition-colors text-[11px] font-bold">清空搜索条件</button>`;
@@ -1534,7 +1537,6 @@
                                 
                                 ${displayTitle !== '未命名片段' ? `<h4 class="text-xs font-bold text-white mb-2 tracking-wide truncate">${escapeHtml(displayTitle)}</h4>` : ''}
                                 
-                                <!-- Product Fix: 加入 break-all 防御超长 Base64/URL 撑破瀑布流网格布局 -->
                                 <div class="whitespace-pre-wrap break-all text-xs text-gray-300 font-mono leading-relaxed bg-[#0B0B15] p-3 rounded-lg border border-white/5 max-h-32 overflow-y-auto no-scrollbar mb-3 relative flex-grow" id="content-${item.id}">${escapeHtml(item.content)}</div>
                                 
                                 <div class="flex items-center gap-1.5 mt-auto pt-2 border-t border-white/5">
