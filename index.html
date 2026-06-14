@@ -145,7 +145,7 @@
 
         <div class="flex-1 max-w-lg relative group">
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 transition-colors group-focus-within:text-neonCyan z-10 pointer-events-none shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <input type="text" id="searchInput" placeholder="搜索... (⌘K)" class="form-input relative z-0 !bg-[#151522]/80 backdrop-blur-sm pl-9 pr-14 py-2 placeholder-gray-400">
+            <input type="text" id="searchInput" placeholder="搜索... (⌘K)" class="form-input relative z-0 !bg-[#151522]/80 backdrop-blur-sm pl-9 pr-14 py-2 placeholder-gray-400" onkeydown="if(event.key==='Enter') this.blur();">
             
             <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 z-10">
                 <span id="searchShortcutHint" class="text-[9px] px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-gray-500 pointer-events-none">⌘K</span>
@@ -176,7 +176,7 @@
     </div>
 
     <!-- ================= 核心表单 Modal ================= -->
-    <div id="addModal" onclick="if(event.target === this) attemptCloseAddModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 overflow-y-auto px-4 py-6">
+    <div id="addModal" onclick="if(event.target === this && event.clientX < this.clientWidth) attemptCloseAddModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 overflow-y-auto px-4 py-6">
         <div class="modal-panel max-w-3xl w-full" id="addModalContent">
             <button onclick="attemptCloseAddModal()" class="btn-icon-rounded absolute top-4 right-4 z-10 shrink-0"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             
@@ -234,7 +234,7 @@
     </div>
 
     <!-- ================= 动态变量引擎 Modal ================= -->
-    <div id="variableModal" onclick="if(event.target === this) closeVariableModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4">
+    <div id="variableModal" onclick="if(event.target === this && event.clientX < this.clientWidth) closeVariableModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4">
         <div class="modal-panel max-w-sm w-full" id="variableModalContent">
             <button onclick="closeVariableModal()" class="btn-icon-rounded absolute top-4 right-4 shrink-0"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             <div class="flex items-center gap-3 mb-5">
@@ -257,7 +257,7 @@
     </div>
 
     <!-- ================= 全局设置 Modal ================= -->
-    <div id="settingsModal" onclick="if(event.target === this) closeSettingsModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4 overflow-y-auto">
+    <div id="settingsModal" onclick="if(event.target === this && event.clientX < this.clientWidth) closeSettingsModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4 overflow-y-auto">
         <div class="modal-panel max-w-md w-full" id="settingsModalContent">
             <button onclick="closeSettingsModal()" class="btn-icon-rounded absolute top-4 right-4 shrink-0"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             <div class="flex items-center gap-3 mb-5">
@@ -289,7 +289,8 @@
                             <input type="password" id="githubTokenInput" placeholder="请输入 GitHub PAT (Personal Access Token)" class="form-input px-3 py-2 text-xs" oninput="localStorage.setItem('PromptHub_GithubToken', this.value.trim())">
                             <input type="text" id="gistIdInput" placeholder="Gist ID (首次推送留空，自动创建)" class="form-input px-3 py-2 text-xs font-mono" oninput="localStorage.setItem('PromptHub_GistId', this.value.trim())">
                             <div class="relative">
-                                <input type="password" id="syncPasswordInput" placeholder="数据加密密码 (可选，输入后开启军工级加密)" class="form-input px-3 py-2 text-xs border-green-500/30 focus:border-green-400 focus:ring-green-400" oninput="localStorage.setItem('PromptHub_SyncPassword', this.value.trim())">
+                                <!-- UI Polish: 修复密码输入框的右侧 padding 重叠陷阱 -->
+                                <input type="password" id="syncPasswordInput" placeholder="数据加密密码 (可选，输入后开启军工级加密)" class="form-input pl-3 !pr-9 py-2 text-xs border-green-500/30 focus:border-green-400 focus:ring-green-400" oninput="localStorage.setItem('PromptHub_SyncPassword', this.value.trim())">
                                 <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-green-500/50 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
                             <div class="flex gap-2 pt-1">
@@ -362,7 +363,7 @@
     </div>
 
     <!-- ================= 确认删除 Modal ================= -->
-    <div id="confirmModal" onclick="if(event.target === this) closeConfirmModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4">
+    <div id="confirmModal" onclick="if(event.target === this && event.clientX < this.clientWidth) closeConfirmModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4">
         <div class="modal-panel max-w-xs w-full" id="confirmModalContent">
             <div class="flex items-center gap-2 mb-3">
                 <div class="p-1.5 bg-danger/10 rounded border border-danger/20">
@@ -479,7 +480,6 @@
         // 2. 交互逻辑 (Toast, Modals, 快捷键)
         // ==========================================
         let toastTimeout;
-        // Fix: 扩展 showToast 支持 warning 状态
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             document.getElementById('toastMessage').innerText = message;
@@ -500,7 +500,7 @@
             toastTimeout = setTimeout(() => {
                 toast.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
                 toast.classList.remove('translate-y-0');
-            }, 3500); // warning 提示适当延长停留时间
+            }, 3500); 
         }
 
         document.addEventListener('keydown', (e) => {
@@ -937,6 +937,9 @@
 
         let pendingVariableTemplate = ''; 
         let pendingVariables = []; 
+        
+        // V8 Fix: 内存级内容快照字典，保证移动端 Safari 剪贴板复制 100% 同步执行通过
+        window.__promptCache = new Map();
 
         function getVariableRegex() {
             const regexMode = localStorage.getItem('PromptHub_VarRegex') || 'safe';
@@ -946,15 +949,13 @@
             return /\{\{([^}]+)\}\}|\[\[([^\]]+)\]\]|【([^】]+)】/g;
         }
 
-        async function copyPromptTextById(id) {
+        // V8 Fix: 取消 async 标签，改为从内存高速同步读取数据以打通移动端限制
+        function copyPromptTextById(id) {
             try {
-                const records = await dbOps.getAll();
-                const item = records.find(r => r.id === id);
-                if (!item || !item.content) return showToast('找不到内容', 'error');
+                const content = window.__promptCache.get(id);
+                if (!content) return showToast('缓存中找不到内容，请刷新重试', 'error');
 
-                const content = item.content;
                 const regex = getVariableRegex();
-
                 const matches = [...content.matchAll(regex)];
                 
                 if (matches.length > 0) {
@@ -964,7 +965,6 @@
                         const innerText = m.slice(1).find(v => v !== undefined).trim(); 
                         if(!uniqueVarsMap.has(outerText)) uniqueVarsMap.set(outerText, innerText);
                     });
-                    
                     openVariableModal(content, Array.from(uniqueVarsMap.entries()));
                 } else {
                     copyPromptText(content);
@@ -1120,7 +1120,6 @@
                 
                 let rawPayload = JSON.stringify({ prompts, categories });
                 
-                // Fix: 探测体积并优雅降级剥离图片。700KB 作为硬边界，确保加上加密膨胀后绝不超过 1MB
                 const byteSize = new Blob([rawPayload]).size;
                 const MAX_GIST_SIZE = 700 * 1024; 
                 
@@ -1128,7 +1127,6 @@
                 if (byteSize > MAX_GIST_SIZE) {
                     didFallback = true;
                     showToast('⚠️ 数据超限，自动降级为纯文本模式以保障同步...', 'warning');
-                    // 断臂求生，剥离图片
                     prompts = prompts.map(p => ({ ...p, image: null }));
                     rawPayload = JSON.stringify({ prompts, categories });
                 } else {
@@ -1215,7 +1213,6 @@
                 let importedPrompts = 0;
                 let localCats = new Set(getCategories());
 
-                // Fix: 在合并前，提取出本地的已有记录，构建冲突防御地图 (Local Asset Shield)
                 const existingRecords = await dbOps.getAll();
                 const existingMap = new Map(existingRecords.map(r => [r.id, r]));
 
@@ -1224,7 +1221,6 @@
                         if(!item.id) item.id = generateUUID();
                         if (item.category) localCats.add(item.category);
                         
-                        // 核心保护：如果云端被降级失去了图片，但本地拥有图片，则反向继承本地资产，拒绝恶意覆盖
                         const localItem = existingMap.get(item.id);
                         if (localItem && localItem.image && !item.image) {
                             item.image = localItem.image;
@@ -1274,6 +1270,12 @@
                 document.getElementById('previewImg').src = currentImageBase64;
                 document.getElementById('uploadZone').classList.add('hidden');
                 document.getElementById('previewWrapper').classList.remove('hidden');
+                document.getElementById('uploadTip').innerText = "点击或粘贴截图";
+            };
+            // V8 Fix: 破损图片防护，补齐 onerror 生命周期防止内存幽灵驻留
+            img.onerror = () => {
+                URL.revokeObjectURL(objectUrl);
+                showToast('图片解析失败，请尝试其他文件', 'error');
                 document.getElementById('uploadTip').innerText = "点击或粘贴截图";
             };
             img.src = objectUrl;
@@ -1493,6 +1495,7 @@
                 }
 
                 statTotal.innerText = records.length;
+                window.__promptCache.clear(); // 清空内容快照缓存
 
                 if (records.length === 0) {
                     let emptyMsg = '库中暂无数据，请新建或在设置中注入演示数据。';
@@ -1514,6 +1517,9 @@
                 listContainer.innerHTML = records.map(item => {
                     const displayTitle = item.title || item.tag || '未命名片段';
                     const displayCat = item.category || '通用';
+                    
+                    // 将核心文本同步置入内存字典
+                    window.__promptCache.set(item.id, item.content);
 
                     return `
                     <div class="masonry-item gradient-border rounded-[20px] overflow-hidden group">
