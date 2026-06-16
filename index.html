@@ -5,8 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PromptHub</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0%25' y1='100%25' x2='100%25' y2='0%25'><stop offset='0%25' stop-color='%23FF007A'/><stop offset='100%25' stop-color='%2300E5FF'/></linearGradient></defs><circle cx='12' cy='12' r='12' fill='url(%23g)'/><path stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none' d='M13 10V3L4 14h7v7l9-11h-7z' transform='translate(4,4) scale(0.66)'/></svg>">
+    
+    <!-- ==========================================
+         🚀 部署与封装建议 (Deployment & App Wrapping)
+         当前采用 CDN 外部引入，是部署 GitHub Pages 等 Web 环境的最佳实践，
+         借助全球 CDN 节点缓存，打开速度最快，且 HTML 文件极小。
+         如后期需通过 Tauri/Electron 封装为纯离线桌面端应用，
+         可将下方 script 的 src 替换为内嵌源码，即可实现 100% 断网可用。
+         ========================================== -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@formkit/auto-animate@1.1.1/browser/index.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -18,8 +28,9 @@
                         neonCyan: '#00E5FF',
                         danger: '#FF3366',
                     },
+                    // 离线体验强化：抛弃依赖网络的 WebFont，全面启用无阻流的原生系统字体库
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
                     }
                 }
             }
@@ -62,8 +73,6 @@
     </style>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
         body {
             background-color: #0B0B15;
             color: #ffffff;
@@ -73,10 +82,18 @@
             background-attachment: fixed;
         }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+        .masonry { column-count: 1; column-gap: 1rem; }
+        @media (min-width: 640px) { .masonry { column-count: 2; } }
+        @media (min-width: 1024px) { .masonry { column-count: 3; } }
+        @media (min-width: 1280px) { .masonry { column-count: 4; } }
+        @media (min-width: 1536px) { .masonry { column-count: 5; } }
+        
+        .masonry-item { break-inside: avoid-column; margin-bottom: 1rem; display: inline-block; width: 100%; }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -128,7 +145,7 @@
 </head>
 <body class="font-sans antialiased min-h-screen">
 
-    <header class="fixed top-0 inset-x-0 h-14 backdrop-blur-xl bg-darkBg/80 border-b border-white/5 z-40 flex items-center justify-between px-4 md:px-6 shadow-sm gap-3">
+    <header class="fixed top-0 inset-x-0 h-14 backdrop-blur-2xl bg-[#0B0B15]/40 border-b border-white/5 z-40 flex items-center justify-between px-4 md:px-6 shadow-[0_4px_30px_rgba(0,0,0,0.1)] gap-3 transition-colors">
         <div class="flex items-center space-x-2 shrink-0">
             <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-neonPink to-neonCyan flex items-center justify-center shadow-[0_0_8px_rgba(255,0,122,0.5)]">
                 <svg class="w-3.5 h-3.5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
@@ -137,8 +154,8 @@
         </div>
 
         <div class="flex-1 max-w-lg relative group">
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 transition-colors group-focus-within:text-neonCyan z-10 pointer-events-none shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <input type="text" id="searchInput" placeholder="搜索... (⌘K)" class="form-input relative z-0 !bg-[#151522]/80 backdrop-blur-sm pl-9 pr-14 py-2 placeholder-gray-400" onkeydown="if(event.key==='Enter') this.blur();">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 transition-colors group-focus-within:text-neonCyan z-10 pointer-events-none shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" id="searchInput" placeholder="搜索... (⌘K)" class="form-input relative z-0 !bg-white/5 hover:!bg-white/10 focus:!bg-white/10 !border-white/5 focus:!border-neonCyan/50 pl-9 pr-14 py-2 placeholder-gray-500 transition-all shadow-inner" onkeydown="if(event.key==='Enter') this.blur();">
             
             <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 z-10">
                 <span id="searchShortcutHint" class="text-[9px] px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-gray-500 pointer-events-none">⌘K</span>
@@ -162,17 +179,15 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/5 pb-3">
             <div id="categoryTabs" class="flex gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto pb-1"></div>
             
-            <!-- 极简纯文本计数器 -->
             <div class="text-xs text-gray-500 whitespace-nowrap shrink-0">
                 共 <span id="statTotal" class="text-neonCyan font-bold mx-0.5">0</span> 条
             </div>
         </div>
-        <!-- 【架构修复】：彻底抛弃 column-count 和 Grid，引入原生 JS Flex 列引擎 -->
         <div id="promptList" class="flex items-start gap-4 lg:gap-6 pb-10 w-full"></div>
     </div>
 
     <!-- ================= 核心表单 Modal ================= -->
-    <div id="addModal" onclick="if(event.target === this && event.clientX < this.clientWidth) attemptCloseAddModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 overflow-y-auto px-4 py-6">
+    <div id="addModal" onclick="if(event.target === this && event.clientX < this.clientWidth) attemptCloseAddModal()" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 overflow-y-auto px-4 py-6">
         <div class="modal-panel max-w-3xl w-full" id="addModalContent">
             <button onclick="attemptCloseAddModal()" class="btn-icon-rounded absolute top-4 right-4 z-10 shrink-0"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             
@@ -230,7 +245,7 @@
     </div>
 
     <!-- ================= 动态变量引擎 Modal ================= -->
-    <div id="variableModal" onclick="if(event.target === this && event.clientX < this.clientWidth) closeVariableModal()" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4">
+    <div id="variableModal" onclick="if(event.target === this && event.clientX < this.clientWidth) closeVariableModal()" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4">
         <div class="modal-panel max-w-sm w-full" id="variableModalContent">
             <button onclick="closeVariableModal()" class="btn-icon-rounded absolute top-4 right-4 shrink-0"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             <div class="flex items-center gap-3 mb-5">
@@ -246,14 +261,14 @@
             <div id="variableInputsContainer" class="space-y-4 mb-6 max-h-[60vh] overflow-y-auto no-scrollbar pr-1"></div>
             
             <button onclick="executeVariableCopy()" class="btn-primary flex items-center justify-center gap-2">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                 填充并复制 (Enter)
             </button>
         </div>
     </div>
 
     <!-- ================= 全局设置 Modal ================= -->
-    <div id="settingsModal" onclick="if(event.target === this && event.clientX < this.clientWidth) closeSettingsModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4 overflow-y-auto">
+    <div id="settingsModal" onclick="if(event.target === this && event.clientX < this.clientWidth) closeSettingsModal()" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4 overflow-y-auto">
         <div class="modal-panel max-w-md w-full" id="settingsModalContent">
             <button onclick="closeSettingsModal()" class="btn-icon-rounded absolute top-4 right-4 shrink-0"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             <div class="flex items-center gap-3 mb-5">
@@ -371,7 +386,7 @@
     </div>
 
     <!-- ================= 确认删除 Modal ================= -->
-    <div id="confirmModal" onclick="if(event.target === this && event.clientX < this.clientWidth) closeConfirmModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4">
+    <div id="confirmModal" onclick="if(event.target === this && event.clientX < this.clientWidth) closeConfirmModal()" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 px-4">
         <div class="modal-panel max-w-xs w-full" id="confirmModalContent">
             <div class="flex items-center gap-2 mb-3">
                 <div class="p-1.5 bg-danger/10 rounded border border-danger/20">
@@ -447,10 +462,12 @@
         const DB_NAME = 'PromptHub_DB';
         const DB_VERSION = 1;
         const STORE_NAME = 'prompts';
-        let db = null;
+        let dbPromise = null;
 
+        // 【重构修复】：强力锁死并发请求，确保数据库完全挂载后才开放连接，杜绝 Transaction Null 报错
         function initDB() {
-            return new Promise((resolve, reject) => {
+            if (dbPromise) return dbPromise;
+            dbPromise = new Promise((resolve, reject) => {
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
                 request.onupgradeneeded = (e) => {
                     const database = e.target.result;
@@ -458,37 +475,53 @@
                         database.createObjectStore(STORE_NAME, { keyPath: 'id' }); 
                     }
                 };
-                request.onsuccess = (e) => { db = e.target.result; resolve(db); };
+                request.onsuccess = (e) => resolve(e.target.result);
                 request.onerror = (e) => reject(e.target.error);
             });
+            return dbPromise;
         }
 
         const dbOps = {
-            add: (data) => new Promise((resolve, reject) => {
-                const tx = db.transaction([STORE_NAME], 'readwrite');
-                tx.objectStore(STORE_NAME).add(data).onsuccess = resolve;
-                tx.onerror = (e) => reject(e.target.error);
-            }),
-            put: (data) => new Promise((resolve, reject) => {
-                const tx = db.transaction([STORE_NAME], 'readwrite');
-                tx.objectStore(STORE_NAME).put(data).onsuccess = resolve;
-                tx.onerror = (e) => reject(e.target.error);
-            }),
-            getAll: () => new Promise((resolve, reject) => {
-                const tx = db.transaction([STORE_NAME], 'readonly');
-                tx.objectStore(STORE_NAME).getAll().onsuccess = (e) => resolve(e.target.result);
-                tx.onerror = (e) => reject(e.target.error);
-            }),
-            delete: (id) => new Promise((resolve, reject) => {
-                const tx = db.transaction([STORE_NAME], 'readwrite');
-                tx.objectStore(STORE_NAME).delete(id).onsuccess = resolve;
-                tx.onerror = (e) => reject(e.target.error);
-            }),
-            clearAll: () => new Promise((resolve, reject) => {
-                const tx = db.transaction([STORE_NAME], 'readwrite');
-                tx.objectStore(STORE_NAME).clear().onsuccess = resolve;
-                tx.onerror = (e) => reject(e.target.error);
-            })
+            add: async (data) => {
+                const db = await initDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction([STORE_NAME], 'readwrite');
+                    tx.objectStore(STORE_NAME).add(data).onsuccess = resolve;
+                    tx.onerror = (e) => reject(e.target.error);
+                });
+            },
+            put: async (data) => {
+                const db = await initDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction([STORE_NAME], 'readwrite');
+                    tx.objectStore(STORE_NAME).put(data).onsuccess = resolve;
+                    tx.onerror = (e) => reject(e.target.error);
+                });
+            },
+            getAll: async () => {
+                const db = await initDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction([STORE_NAME], 'readonly');
+                    tx.objectStore(STORE_NAME).getAll().onsuccess = (e) => resolve(e.target.result);
+                    tx.onerror = (e) => reject(e.target.error);
+                });
+            },
+            delete: async (id) => {
+                const db = await initDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction([STORE_NAME], 'readwrite');
+                    tx.objectStore(STORE_NAME).delete(id).onsuccess = resolve;
+                    tx.onerror = (e) => reject(e.target.error);
+                });
+            },
+            clearAll: async () => {
+                const db = await initDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction([STORE_NAME], 'readwrite');
+                    tx.objectStore(STORE_NAME).clear().onsuccess = resolve;
+                    tx.onerror = (e) => reject(e.target.error);
+                });
+            }
         };
 
         // ==========================================
@@ -1331,39 +1364,37 @@
             e.target.value = ''; // 重置 input 状态，允许用户反复选择同一张图
         });
 
-        // 弹窗防暴穿机制，防止剪贴板监听导致UI层级错乱
+        // 终极重构：智能粘贴。只要剪贴板有图片，无论焦点在哪里，都能剥离出图片并唤起/应用到弹窗
         document.addEventListener('paste', (e) => {
-            const activeElement = document.activeElement;
-            // 扩大豁免范围：任何输入框、文本域或富文本编辑区，一律放行原生粘贴
-            if (activeElement && (
-                ['INPUT', 'TEXTAREA'].includes(activeElement.tagName) || 
-                activeElement.isContentEditable
-            )) {
-                return; 
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            let hasImage = false;
+            let imageFile = null;
+
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].kind === 'file' && items[i].type.startsWith('image/')) {
+                    hasImage = true;
+                    imageFile = items[i].getAsFile();
+                    break;
+                }
             }
 
-            // 防御：如果非新建弹窗处于打开状态，严禁强行唤起新建导致层级混乱
+            // 如果没图片，彻底放行，让浏览器处理文字粘贴
+            if (!hasImage) return;
+
+            // 防御：如果非【新建/编辑】的弹窗开着，切断拦截防层级暴穿
             const blockModals = ['settingsModal', 'variableModal', 'imageLightboxModal', 'confirmModal'];
             const isAnyBlockModalOpen = blockModals.some(id => !document.getElementById(id).classList.contains('opacity-0'));
             if (isAnyBlockModalOpen) return;
 
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-                if (item.kind === 'file' && item.type.startsWith('image/')) {
-                    const file = item.getAsFile();
-                    
-                    const addModal = document.getElementById('addModal');
-                    if (addModal.classList.contains('opacity-0')) {
-                        openAddModal();
-                    }
-                    
-                    processImageFile(file);
-                    showToast('识别到剪贴板图片，已开启新建');
-                    e.preventDefault();
-                    break; 
-                }
+            // 智能唤起并应用
+            const addModal = document.getElementById('addModal');
+            if (addModal.classList.contains('opacity-0')) {
+                openAddModal();
             }
+            
+            processImageFile(imageFile);
+            showToast('✨ 识别到剪贴板图片，已应用');
+            e.preventDefault(); 
         });
 
         function clearSelectedImage() {
@@ -1589,6 +1620,7 @@
                 // 清洗上一轮渲染遗留的 Blob URLs 防止内存泄露
                 cleanupBlobUrls();
 
+                // 【架构修复】：彻底消除 getAll 时的 db 空指针风险，全程由 Promise 护航
                 let records = await dbOps.getAll();
                 records.sort((a, b) => b.timestamp - a.timestamp);
                 
@@ -1615,6 +1647,9 @@
 
                 window.__promptCache.clear(); 
 
+                const emptyState = document.getElementById('empty-state-msg');
+                if (emptyState) emptyState.remove();
+
                 if (records.length === 0) {
                     let emptyMsg = '库中暂无数据，请新建或在设置中注入演示数据。';
                     if (searchQuery) {
@@ -1625,15 +1660,21 @@
                         emptyMsg = `[${escapeHtml(activeCategory)}] 分类下暂无内容。`;
                     }
 
-                    listContainer.innerHTML = `
-                        <div style="column-span: all;" class="w-full flex flex-col items-center justify-center py-20">
-                            <span class="text-gray-500 text-xs tracking-wide text-center leading-relaxed">${emptyMsg}</span>
-                        </div>`;
+                    // 完全清空列，插入空状态
+                    listContainer.innerHTML = '';
+                    
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.id = 'empty-state-msg';
+                    emptyDiv.className = 'w-full flex flex-col items-center justify-center py-20';
+                    emptyDiv.style.columnSpan = 'all';
+                    emptyDiv.innerHTML = `<span class="text-gray-500 text-xs tracking-wide text-center leading-relaxed">${emptyMsg}</span>`;
+                    listContainer.appendChild(emptyDiv);
                     return;
                 }
 
-                // 【架构突围】：原生 JS Round-Robin 瀑布流引擎
-                // 完美解决 CSS Column 的向左挤压，以及 CSS Grid 的横向塌陷断层
+                // ==============================================================
+                // 🚀 核心重构：虚拟 DOM 复用引擎 (配合 AutoAnimate 实现丝滑 FLIP 动画)
+                // ==============================================================
                 const width = window.innerWidth;
                 let colCount = 1;
                 if (width >= 1536) colCount = 5;      // 2xl 
@@ -1641,32 +1682,46 @@
                 else if (width >= 1024) colCount = 3; // lg
                 else if (width >= 640) colCount = 2;  // sm
 
-                const cols = Array.from({ length: colCount }, () => []);
+                // 1. 动态对齐列容器，并为每列挂载 AutoAnimate
+                while (listContainer.children.length > colCount) {
+                    listContainer.removeChild(listContainer.lastChild);
+                }
+                while (listContainer.children.length < colCount) {
+                    const col = document.createElement('div');
+                    col.className = 'flex flex-col flex-1 gap-4 lg:gap-6 min-w-[240px]';
+                    if (window.autoAnimate) window.autoAnimate(col, { duration: 250 });
+                    listContainer.appendChild(col);
+                }
+                const columns = Array.from(listContainer.children);
 
+                // 2. 收集当前已存在的所有卡片节点，建立索引
+                const existingCards = new Map();
+                document.querySelectorAll('.masonry-item').forEach(card => {
+                    existingCards.set(card.dataset.id, card);
+                });
+
+                // 3. 遍历最新数据，复用/更新/创建 节点
                 records.forEach((item, index) => {
                     const displayTitle = item.title || item.tag || '未命名片段';
                     const displayCat = item.category || '通用';
                     
                     window.__promptCache.set(item.id, item.content);
 
-                    // 兼容处理 Blob 对象与旧版 Base64
                     let imgUrl = '';
                     if (item.image) {
                         if (typeof item.image === 'string') {
                             imgUrl = item.image;
                         } else if (item.image instanceof Blob) {
                             imgUrl = URL.createObjectURL(item.image);
-                            window.__blobUrls.push(imgUrl); // 记录以便后续清理
+                            window.__blobUrls.push(imgUrl);
                         }
                     }
 
-                    // 移除旧版的 grid/masonry 样式，让卡片纯粹适应容器
-                    const cardHTML = `
-                    <div class="gradient-border rounded-[20px] overflow-hidden group w-full animate-fade-in" style="animation-delay: ${Math.min((index%10) * 30, 300)}ms">
-                        <div class="bg-darkCard rounded-[19px] h-full flex flex-col">
+                    const cardInnerHTML = `
+                        <div class="bg-darkCard rounded-[19px] h-full flex flex-col border border-transparent hover:border-white/5 transition-colors">
                             ${imgUrl ? `
                                 <div class="relative w-full pt-[50%] overflow-hidden rounded-t-[19px] bg-[#0B0B15]">
-                                    <img src="${imgUrl}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-zoom-in" onclick="openImageLightbox('${imgUrl}')">
+                                    <img src="${imgUrl}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105 cursor-zoom-in" onclick="openImageLightbox('${imgUrl}')">
                                     <div class="absolute inset-0 bg-gradient-to-t from-darkCard via-transparent to-transparent pointer-events-none"></div>
                                 </div>
                             ` : ''}
@@ -1704,18 +1759,40 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
                     `;
-                    // 将卡片轮流发牌塞进对应的列中
-                    cols[index % colCount].push(cardHTML);
+
+                    let cardEl = existingCards.get(item.id);
+                    const itemVersion = String(item.updatedAt || item.timestamp);
+                    
+                    if (!cardEl) {
+                        // 创建新卡片，不再强行加动画类，交给 AutoAnimate 处理
+                        cardEl = document.createElement('div');
+                        cardEl.className = 'masonry-item gradient-border rounded-[20px] overflow-hidden group w-full';
+                        cardEl.dataset.id = item.id;
+                        cardEl.dataset.version = itemVersion;
+                        cardEl.innerHTML = cardInnerHTML;
+                    } else {
+                        // 命中缓存：仅在数据有变动时才重刷 innerHTML
+                        if (cardEl.dataset.version !== itemVersion || imgUrl !== cardEl.dataset.imgUrl) {
+                            cardEl.innerHTML = cardInnerHTML;
+                            cardEl.dataset.version = itemVersion;
+                        }
+                        // 从缓存集合中剔除已复用的节点
+                        existingCards.delete(item.id);
+                    }
+                    
+                    cardEl.dataset.imgUrl = imgUrl;
+
+                    // 4. 将节点压入对应的瀑布流列 (物理搬运)
+                    const targetCol = columns[index % colCount];
+                    // 如果节点已经在这个位置的对应坑位，就不动它，减少 DOM 操作
+                    if (targetCol.children[Math.floor(index / colCount)] !== cardEl) {
+                        targetCol.appendChild(cardEl); // AutoAnimate 会捕获这个 Append 动作产生位移动画
+                    }
                 });
 
-                // 将列数组组合为实际的 HTML 结构
-                listContainer.innerHTML = cols.map(colHTML => `
-                    <div class="flex flex-col flex-1 gap-4 lg:gap-6 min-w-[240px]">
-                        ${colHTML.join('')}
-                    </div>
-                `).join('');
+                // 5. 摧毁所有未被复用的废弃节点 (如被搜索过滤掉的、被删除的)
+                existingCards.forEach(card => card.remove()); // AutoAnimate 会捕获 Remove 产生消失动画
 
             } catch (err) {
                 console.error("Render error:", err);
@@ -1723,7 +1800,7 @@
             }
         }
 
-        // 【重构配套】：窗口尺寸改变时，防抖触发瀑布流引擎重新计算排版
+        // 窗口尺寸改变时，防抖触发瀑布流引擎重新计算排版
         let layoutResizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(layoutResizeTimer);
@@ -1732,14 +1809,29 @@
             }, 150);
         });
 
-        window.addEventListener('DOMContentLoaded', async () => {
+        // 极限兼容：保证在各宿主环境下正确完成初始化
+        const bootApp = async () => {
             try {
+                // 初始化其他全局 AutoAnimate 容器 (分类切换、标签管理)
+                if (window.autoAnimate) {
+                    window.autoAnimate(document.getElementById('categoryTabs'), { duration: 200 });
+                    window.autoAnimate(document.getElementById('settingsCategoryList'), { duration: 200 });
+                    window.autoAnimate(document.getElementById('variableInputsContainer'), { duration: 200 });
+                }
+
                 await initDB();
                 loadAndRenderList();
             } catch (err) {
+                console.error(err);
                 showToast("当前环境暂不支持 IndexedDB", "error");
             }
-        });
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bootApp);
+        } else {
+            bootApp();
+        }
     </script>
 </body>
 </html>
