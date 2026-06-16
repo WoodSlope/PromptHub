@@ -167,8 +167,8 @@
                 共 <span id="statTotal" class="text-neonCyan font-bold mx-0.5">0</span> 条
             </div>
         </div>
-        <!-- 【架构修复】：彻底抛弃 column-count 瀑布流，拥抱绝对稳定的 CSS Grid 横向平铺引擎 -->
-        <div id="promptList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-6 items-start pb-10"></div>
+        <!-- 【架构修复】：彻底抛弃 column-count 和 Grid，引入原生 JS Flex 列引擎 -->
+        <div id="promptList" class="flex items-start gap-4 lg:gap-6 pb-10 w-full"></div>
     </div>
 
     <!-- ================= 核心表单 Modal ================= -->
@@ -1632,7 +1632,18 @@
                     return;
                 }
 
-                listContainer.innerHTML = records.map(item => {
+                // 【架构突围】：原生 JS Round-Robin 瀑布流引擎
+                // 完美解决 CSS Column 的向左挤压，以及 CSS Grid 的横向塌陷断层
+                const width = window.innerWidth;
+                let colCount = 1;
+                if (width >= 1536) colCount = 5;      // 2xl 
+                else if (width >= 1280) colCount = 4; // xl
+                else if (width >= 1024) colCount = 3; // lg
+                else if (width >= 640) colCount = 2;  // sm
+
+                const cols = Array.from({ length: colCount }, () => []);
+
+                records.forEach((item, index) => {
                     const displayTitle = item.title || item.tag || '未命名片段';
                     const displayCat = item.category || '通用';
                     
@@ -1649,8 +1660,9 @@
                         }
                     }
 
-                    return `
-                    <div class="gradient-border rounded-[20px] overflow-hidden group w-full">
+                    // 移除旧版的 grid/masonry 样式，让卡片纯粹适应容器
+                    const cardHTML = `
+                    <div class="gradient-border rounded-[20px] overflow-hidden group w-full animate-fade-in" style="animation-delay: ${Math.min((index%10) * 30, 300)}ms">
                         <div class="bg-darkCard rounded-[19px] h-full flex flex-col">
                             ${imgUrl ? `
                                 <div class="relative w-full pt-[50%] overflow-hidden rounded-t-[19px] bg-[#0B0B15]">
@@ -1694,13 +1706,31 @@
                         </div>
                     </div>
                     `;
-                }).join('');
+                    // 将卡片轮流发牌塞进对应的列中
+                    cols[index % colCount].push(cardHTML);
+                });
+
+                // 将列数组组合为实际的 HTML 结构
+                listContainer.innerHTML = cols.map(colHTML => `
+                    <div class="flex flex-col flex-1 gap-4 lg:gap-6 min-w-[240px]">
+                        ${colHTML.join('')}
+                    </div>
+                `).join('');
 
             } catch (err) {
                 console.error("Render error:", err);
                 showToast("核心数据读取异常", "error");
             }
         }
+
+        // 【重构配套】：窗口尺寸改变时，防抖触发瀑布流引擎重新计算排版
+        let layoutResizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(layoutResizeTimer);
+            layoutResizeTimer = setTimeout(() => {
+                loadAndRenderList();
+            }, 150);
+        });
 
         window.addEventListener('DOMContentLoaded', async () => {
             try {
