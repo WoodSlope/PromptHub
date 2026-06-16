@@ -6,6 +6,7 @@
     <title>PromptHub</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0%25' y1='100%25' x2='100%25' y2='0%25'><stop offset='0%25' stop-color='%23FF007A'/><stop offset='100%25' stop-color='%2300E5FF'/></linearGradient></defs><circle cx='12' cy='12' r='12' fill='url(%23g)'/><path stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none' d='M13 10V3L4 14h7v7l9-11h-7z' transform='translate(4,4) scale(0.66)'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -49,7 +50,7 @@
                 @apply w-full bg-[#0B0B15] text-white text-xs border border-white/10 rounded-lg focus:outline-none focus:border-neonCyan focus:ring-1 focus:ring-neonCyan transition-all;
             }
             .form-label {
-                @apply block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1;
+                @apply block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1 cursor-pointer;
             }
             .modal-panel {
                 @apply bg-darkCard border border-white/10 rounded-2xl p-5 sm:p-6 relative transform scale-95 transition-transform duration-200 m-auto shadow-2xl;
@@ -168,6 +169,7 @@
     <div class="max-w-[1500px] mx-auto pt-20 px-4 md:px-6 space-y-4">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/5 pb-3">
             <div id="categoryTabs" class="flex gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto pb-1"></div>
+            
             <div class="text-xs text-gray-500 whitespace-nowrap shrink-0">
                 共 <span id="statTotal" class="text-neonCyan font-bold mx-0.5">0</span> 条
             </div>
@@ -185,11 +187,11 @@
             <div class="flex flex-col md:flex-row gap-5 mb-5 md:items-start">
                 <div class="w-full md:w-5/12 flex flex-col gap-4">
                     <div>
-                        <label class="form-label">分类</label>
+                        <label class="form-label" for="categorySelect">分类</label>
                         <select id="categorySelect" class="form-input px-3 py-2.5 cursor-pointer"></select>
                     </div>
                     <div>
-                        <label class="form-label flex justify-between">
+                        <label class="form-label flex justify-between" for="titleInput">
                             <span>标题</span>
                             <span class="text-[9px] text-neonCyan font-normal normal-case"><span class="font-mono">{{变量}}</span> 支持动态填空</span>
                         </label>
@@ -221,8 +223,8 @@
                 </div>
 
                 <div class="w-full md:w-7/12 flex flex-col h-full">
-                    <label class="form-label">内容 <span class="text-neonPink">*</span></label>
-                    <textarea id="contentInput" placeholder="描述你希望 AI 做什么... 可以包含 {{你的变量}} 实现点击复制时动态填空。" class="form-input px-3 py-2.5 w-full resize-none leading-relaxed min-h-[200px] max-h-[50vh] overflow-y-auto" oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'"></textarea>
+                    <label class="form-label" for="contentInput">内容 <span class="text-neonPink">*</span></label>
+                    <textarea id="contentInput" placeholder="描述你希望 AI 做什么... 可以包含 {{你的变量}} 实现点击复制时动态填空。" class="form-input px-3 py-2.5 w-full resize-none leading-relaxed min-h-[200px] max-h-[50vh] overflow-y-auto overscroll-contain" oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'"></textarea>
                 </div>
             </div>
 
@@ -250,7 +252,7 @@
             <div id="variableInputsContainer" class="space-y-4 mb-6 max-h-[60vh] overflow-y-auto no-scrollbar pr-1"></div>
             
             <button onclick="executeVariableCopy()" class="btn-primary flex items-center justify-center gap-2">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                 填充并复制 (Enter)
             </button>
         </div>
@@ -289,16 +291,15 @@
                             <input type="password" id="githubTokenInput" placeholder="请输入 GitHub PAT (Personal Access Token)" class="form-input px-3 py-2 text-xs" oninput="localStorage.setItem('PromptHub_GithubToken', this.value.trim())">
                             <input type="text" id="gistIdInput" placeholder="Gist ID (首次推送留空，自动创建)" class="form-input px-3 py-2 text-xs font-mono" oninput="localStorage.setItem('PromptHub_GistId', this.value.trim())">
                             <div class="relative">
-                                <!-- UI Polish: 修复密码输入框的右侧 padding 重叠陷阱 -->
                                 <input type="password" id="syncPasswordInput" placeholder="数据加密密码 (可选，输入后开启军工级加密)" class="form-input pl-3 !pr-9 py-2 text-xs border-green-500/30 focus:border-green-400 focus:ring-green-400" oninput="localStorage.setItem('PromptHub_SyncPassword', this.value.trim())">
                                 <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-green-500/50 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </div>
                             <div class="flex gap-2 pt-1">
                                 <button id="btn-push-sync" onclick="pushToCloud()" class="btn-panel !bg-neonCyan/10 !text-neonCyan !border-neonCyan/20 hover:!bg-neonCyan/20 hover:!border-neonCyan/50">
-                                    ↑ 强制推送
+                                    ↑ 云端覆写 (Push)
                                 </button>
                                 <button id="btn-pull-sync" onclick="pullFromCloud()" class="btn-panel !bg-yellow-400/10 !text-yellow-400 !border-yellow-400/20 hover:!bg-yellow-400/20 hover:!border-yellow-400/50">
-                                    ↓ 云端合并
+                                    ↓ 双向合并 (Pull)
                                 </button>
                             </div>
                             <p class="text-[9px] text-gray-500 leading-relaxed">
@@ -310,9 +311,22 @@
                     <div>
                         <h4 class="form-label">本地数据与备份</h4>
                         <div class="flex gap-2">
-                            <input type="file" id="importInput" accept=".json" class="hidden">
-                            <button onclick="document.getElementById('importInput').click()" class="btn-panel hover:border-white">导入 JSON</button>
-                            <button onclick="exportData()" class="btn-panel hover:border-white">导出备份</button>
+                            <input type="file" id="importInput" accept=".zip,.json" class="hidden">
+                            <button onclick="document.getElementById('importInput').click()" class="btn-panel hover:border-white">导入恢复</button>
+                            <button onclick="exportData()" class="btn-panel hover:border-white">全量导出 (.zip)</button>
+                        </div>
+                    </div>
+
+                    <!-- 极客说明：存储容量指南 -->
+                    <div class="bg-black/30 border border-white/10 rounded-lg p-3 space-y-2.5">
+                        <h5 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">存储容量说明</h5>
+                        <div class="flex items-start gap-2 text-[10px] text-gray-400">
+                            <svg class="w-3.5 h-3.5 text-neonCyan shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                            <p><strong class="text-neonCyan">云端同步 (纯文本)：</strong>受限于 Gist 体积墙，最多支持同步约 <span class="text-white">2000+</span> 条文本提示词。为确保极速稳定，所有图片资产被强制隔离，不上云。</p>
+                        </div>
+                        <div class="flex items-start gap-2 text-[10px] text-gray-400">
+                            <svg class="w-3.5 h-3.5 text-neonPink shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <p><strong class="text-neonPink">本地存储 (图文)：</strong>使用浏览器级 IndexedDB，理论无上限。可安全存储 <span class="text-white">数万条</span> 包含高清图片的视觉资产及提示词。</p>
                         </div>
                     </div>
                 </div>
@@ -407,6 +421,13 @@
             return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
         };
 
+        // 斩断内存幽灵：统一管理 Blob URLs 生命周期
+        window.__blobUrls = window.__blobUrls || [];
+        function cleanupBlobUrls() {
+            window.__blobUrls.forEach(url => URL.revokeObjectURL(url));
+            window.__blobUrls = [];
+        }
+
         // ==========================================
         // 0. 分类管理系统
         // ==========================================
@@ -479,6 +500,33 @@
         // ==========================================
         // 2. 交互逻辑 (Toast, Modals, 快捷键)
         // ==========================================
+        
+        // DRY 抽象公共弹窗控制逻辑
+        function openModalView(modalId, contentId) {
+            const modal = document.getElementById(modalId);
+            const content = document.getElementById(contentId);
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => content.classList.remove('scale-95'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModalView(modalId, contentId, onClosed) {
+            const modal = document.getElementById(modalId);
+            const content = document.getElementById(contentId);
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                
+                // 防止多弹窗叠加时，关闭子弹窗误释父弹窗的滚动锁
+                const activeModals = document.querySelectorAll('.fixed.inset-0:not(.opacity-0)');
+                if (activeModals.length <= 1) { 
+                    document.body.style.overflow = '';
+                }
+                
+                if(onClosed) onClosed();
+            }, 200);
+        }
+
         let toastTimeout;
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -529,22 +577,13 @@
         });
 
         function openImageLightbox(src) {
-            const modal = document.getElementById('imageLightboxModal');
             const img = document.getElementById('lightboxImg');
             img.src = src;
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => img.classList.remove('scale-95'), 10);
-            document.body.style.overflow = 'hidden';
+            openModalView('imageLightboxModal', 'lightboxImg');
         }
 
         function closeImageLightbox() {
-            const modal = document.getElementById('imageLightboxModal');
-            const img = document.getElementById('lightboxImg');
-            img.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('opacity-0', 'pointer-events-none');
-                document.body.style.overflow = '';
-            }, 200);
+            closeModalView('imageLightboxModal', 'lightboxImg');
         }
 
         async function insertMockData() {
@@ -572,13 +611,14 @@
         // --- 核心表单弹窗 (支持 新建 / 编辑) ---
         let currentEditId = null;
         let initialFormState = ''; 
+        let currentImageData = null; 
 
         function getFormStateSnapshot() {
             return JSON.stringify({
                 c: document.getElementById('categorySelect').value,
                 t: document.getElementById('titleInput').value.trim(),
                 p: document.getElementById('contentInput').value.trim(),
-                i: currentImageBase64
+                imgSize: currentImageData ? (currentImageData.size || currentImageData.length || 1) : 0
             });
         }
 
@@ -612,7 +652,14 @@
             clearSelectedImage();
             
             initialFormState = getFormStateSnapshot();
-            showFormModal();
+            
+            openModalView('addModal', 'addModalContent');
+            setTimeout(() => {
+                const titleInput = document.getElementById('titleInput');
+                const contentInput = document.getElementById('contentInput');
+                if (!titleInput.value) titleInput.focus();
+                else contentInput.focus();
+            }, 150);
         }
 
         async function openEditModal(id) {
@@ -648,8 +695,16 @@
             }, 10);
 
             if (item.image) {
-                currentImageBase64 = item.image;
-                document.getElementById('previewImg').src = item.image;
+                currentImageData = item.image;
+                
+                let previewUrl = item.image;
+                if (item.image instanceof Blob) {
+                    previewUrl = URL.createObjectURL(item.image);
+                    if (window.__previewUrl) URL.revokeObjectURL(window.__previewUrl);
+                    window.__previewUrl = previewUrl;
+                }
+
+                document.getElementById('previewImg').src = previewUrl;
                 document.getElementById('uploadZone').classList.add('hidden');
                 document.getElementById('previewWrapper').classList.remove('hidden');
             } else {
@@ -657,22 +712,14 @@
             }
             
             initialFormState = getFormStateSnapshot();
-            showFormModal();
-        }
-
-        function showFormModal() {
-            const modal = document.getElementById('addModal');
-            const content = document.getElementById('addModalContent');
-            modal.classList.remove('opacity-0', 'pointer-events-none');
             
+            openModalView('addModal', 'addModalContent');
             setTimeout(() => {
-                content.classList.remove('scale-95');
                 const titleInput = document.getElementById('titleInput');
                 const contentInput = document.getElementById('contentInput');
                 if (!titleInput.value) titleInput.focus();
                 else contentInput.focus();
-            }, 100);
-            document.body.style.overflow = 'hidden';
+            }, 150);
         }
 
         function attemptCloseAddModal() {
@@ -690,13 +737,13 @@
         }
 
         function closeAddModal() {
-            const modal = document.getElementById('addModal');
-            const content = document.getElementById('addModalContent');
-            content.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('opacity-0', 'pointer-events-none');
-                document.body.style.overflow = '';
-            }, 200);
+            closeModalView('addModal', 'addModalContent', () => {
+                // 斩断取消编辑时的内存幽灵 URL
+                if (window.__previewUrl) {
+                    URL.revokeObjectURL(window.__previewUrl);
+                    window.__previewUrl = null;
+                }
+            });
         }
 
         // --- 设置弹窗逻辑 ---
@@ -714,23 +761,13 @@
             document.getElementById('varRegexSelect').value = localStorage.getItem('PromptHub_VarRegex') || 'safe';
 
             switchSettingsTab('sync');
-
-            const modal = document.getElementById('settingsModal');
-            const content = document.getElementById('settingsModalContent');
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => content.classList.remove('scale-95'), 10);
-            document.body.style.overflow = 'hidden';
+            openModalView('settingsModal', 'settingsModalContent');
         }
 
         function closeSettingsModal() {
-            const modal = document.getElementById('settingsModal');
-            const content = document.getElementById('settingsModalContent');
-            content.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('opacity-0', 'pointer-events-none');
-                document.body.style.overflow = '';
-            }, 200);
-            loadAndRenderList();
+            closeModalView('settingsModal', 'settingsModalContent', () => {
+                loadAndRenderList();
+            });
         }
 
         function switchSettingsTab(tabName) {
@@ -880,11 +917,7 @@
                 await callbackFn();
                 closeConfirmModal();
             };
-            
-            const modal = document.getElementById('confirmModal');
-            const content = document.getElementById('confirmModalContent');
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => content.classList.remove('scale-95'), 10);
+            openModalView('confirmModal', 'confirmModalContent');
         }
 
         function openConfirmModal(id) {
@@ -902,10 +935,7 @@
 
         function closeConfirmModal() {
             confirmAction = null;
-            const modal = document.getElementById('confirmModal');
-            const content = document.getElementById('confirmModalContent');
-            content.classList.add('scale-95');
-            setTimeout(() => modal.classList.add('opacity-0', 'pointer-events-none'), 150);
+            closeModalView('confirmModal', 'confirmModalContent');
         }
 
         document.getElementById('confirmBtn').addEventListener('click', async () => {
@@ -916,18 +946,27 @@
         // 剪贴板与核心动态变量引擎 
         // ==========================================
         
-        async function copyPromptText(text) {
+        // 【极限防守】：去除 async 的微任务延迟，保证 iOS Safari 复制 100% 成功率
+        function copyPromptText(text) {
             if (navigator.clipboard && window.isSecureContext) {
-                try {
-                    await navigator.clipboard.writeText(text);
+                // 将 API 变为绝对首层同步调用
+                navigator.clipboard.writeText(text).then(() => {
                     showToast('✨ 已复制！');
-                    return;
-                } catch (err) { console.warn('Clipboard API fallback'); }
+                }).catch(() => {
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text);
             }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
             const textArea = document.createElement("textarea");
             textArea.value = text;
             textArea.style.position = "fixed"; textArea.style.left = "-9999px";
-            document.body.appendChild(textArea); textArea.select();
+            document.body.appendChild(textArea); 
+            textArea.focus();
+            textArea.select();
             try {
                 if(document.execCommand('copy')) showToast('✨ 已复制！');
                 else showToast('复制失败', 'error');
@@ -938,7 +977,6 @@
         let pendingVariableTemplate = ''; 
         let pendingVariables = []; 
         
-        // V8 Fix: 内存级内容快照字典，保证移动端 Safari 剪贴板复制 100% 同步执行通过
         window.__promptCache = new Map();
 
         function getVariableRegex() {
@@ -949,7 +987,6 @@
             return /\{\{([^}]+)\}\}|\[\[([^\]]+)\]\]|【([^】]+)】/g;
         }
 
-        // V8 Fix: 取消 async 标签，改为从内存高速同步读取数据以打通移动端限制
         function copyPromptTextById(id) {
             try {
                 const content = window.__promptCache.get(id);
@@ -983,7 +1020,7 @@
             
             container.innerHTML = pendingVariables.map((v, index) => `
                 <div class="mb-3 animate-fade-in" style="animation-delay: ${index * 50}ms">
-                    <label class="form-label !text-neonCyan flex items-center justify-between">
+                    <label class="form-label !text-neonCyan flex items-center justify-between" for="var-input-${index}">
                         <span>${escapeHtml(v.inner)}</span>
                         <span class="text-[9px] text-gray-500 normal-case tracking-normal font-mono bg-white/5 px-1 rounded">${escapeHtml(v.outer)}</span>
                     </label>
@@ -991,29 +1028,18 @@
                 </div>
             `).join('');
             
-            const modal = document.getElementById('variableModal');
-            const content = document.getElementById('variableModalContent');
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            
+            openModalView('variableModal', 'variableModalContent');
             setTimeout(() => {
-                content.classList.remove('scale-95');
                 const firstInput = document.getElementById('var-input-0');
                 if(firstInput) firstInput.focus();
-            }, 100); 
-            
-            document.body.style.overflow = 'hidden';
+            }, 150); 
         }
 
         function closeVariableModal() {
-            const modal = document.getElementById('variableModal');
-            const content = document.getElementById('variableModalContent');
-            content.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('opacity-0', 'pointer-events-none');
-                document.body.style.overflow = '';
+            closeModalView('variableModal', 'variableModalContent', () => {
                 pendingVariableTemplate = ''; 
                 document.getElementById('variableInputsContainer').innerHTML = '';
-            }, 200);
+            });
         }
 
         function executeVariableCopy() {
@@ -1115,26 +1141,27 @@
             btn.disabled = true;
 
             try {
-                let prompts = await dbOps.getAll();
+                let rawPrompts = await dbOps.getAll();
                 const categories = getCategories();
                 
-                let rawPayload = JSON.stringify({ prompts, categories });
+                // 执行视觉资产强制物理剥离，只推文本上云
+                const cloudSafePrompts = rawPrompts.map(p => {
+                    const { image, ...rest } = p;
+                    return rest;
+                });
+                
+                let rawPayload = JSON.stringify({ prompts: cloudSafePrompts, categories });
                 
                 const byteSize = new Blob([rawPayload]).size;
                 const MAX_GIST_SIZE = 700 * 1024; 
                 
-                let didFallback = false;
                 if (byteSize > MAX_GIST_SIZE) {
-                    didFallback = true;
-                    showToast('⚠️ 数据超限，自动降级为纯文本模式以保障同步...', 'warning');
-                    prompts = prompts.map(p => ({ ...p, image: null }));
-                    rawPayload = JSON.stringify({ prompts, categories });
+                    showToast('⚠️ 纯文本数据已逼近 Gist 极限，同步可能截断', 'warning');
                 } else {
-                    showToast(syncPwd ? '🔐 正在加密并推送至云端...' : '🚀 正在推送至云端...');
+                    showToast(syncPwd ? '🔐 正在加密并推送纯文本至云端...' : '🚀 正在推送纯文本至云端...');
                 }
 
                 let finalPayload;
-
                 if (syncPwd) {
                     const encryptedStr = await cryptoOps.encrypt(rawPayload, syncPwd);
                     finalPayload = JSON.stringify({ encrypted: true, data: encryptedStr }, null, 2);
@@ -1143,7 +1170,7 @@
                 }
                 
                 const body = {
-                    description: "PromptHub Cloud Sync Backup (BYOK)",
+                    description: "PromptHub Cloud Sync Backup (BYOK) - Text Only",
                     public: false, 
                     files: { "prompthub_sync_data.json": { content: finalPayload } }
                 };
@@ -1165,7 +1192,7 @@
                     localStorage.setItem('PromptHub_GistId', data.id);
                     document.getElementById('gistIdInput').value = data.id;
                 }
-                if (!didFallback) showToast(syncPwd ? '✨ 端到端加密同步成功！' : '✨ 云端同步成功！');
+                showToast(syncPwd ? '✨ 纯文本端到端加密同步成功！' : '✨ 纯文本云端同步成功！');
             } catch (err) { 
                 console.error(err);
                 showToast('❌ 推送失败，请检查 Token', 'error'); 
@@ -1221,9 +1248,10 @@
                         if(!item.id) item.id = generateUUID();
                         if (item.category) localCats.add(item.category);
                         
+                        // 本地资产反向继承：即使云端没图片，只要本地有，就自动缝合保留
                         const localItem = existingMap.get(item.id);
-                        if (localItem && localItem.image && !item.image) {
-                            item.image = localItem.image;
+                        if (localItem) {
+                            if (localItem.image && !item.image) item.image = localItem.image;
                         }
 
                         await dbOps.put(item);
@@ -1250,12 +1278,17 @@
             }
         }
 
-        let currentImageBase64 = null;
-
         function processImageFile(file) {
             document.getElementById('uploadTip').innerText = "处理压缩中...";
-            const img = new Image();
             
+            // 解决竞态条件：处理图片期间，禁止点击保存按钮
+            const submitBtn = document.getElementById('formSubmitBtn');
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            submitBtn.innerText = '图片处理中...';
+
+            const img = new Image();
             const objectUrl = URL.createObjectURL(file);
             
             img.onload = () => {
@@ -1265,18 +1298,35 @@
                 const canvas = document.createElement('canvas');
                 canvas.width = width; canvas.height = height;
                 canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                currentImageBase64 = canvas.toDataURL('image/webp', 0.8);
                 
-                document.getElementById('previewImg').src = currentImageBase64;
-                document.getElementById('uploadZone').classList.add('hidden');
-                document.getElementById('previewWrapper').classList.remove('hidden');
-                document.getElementById('uploadTip').innerText = "点击或粘贴截图";
+                canvas.toBlob((blob) => {
+                    currentImageData = blob;
+                    const previewUrl = URL.createObjectURL(blob);
+                    
+                    if (window.__previewUrl) URL.revokeObjectURL(window.__previewUrl);
+                    window.__previewUrl = previewUrl;
+
+                    document.getElementById('previewImg').src = previewUrl;
+                    document.getElementById('uploadZone').classList.add('hidden');
+                    document.getElementById('previewWrapper').classList.remove('hidden');
+                    document.getElementById('uploadTip').innerText = "点击或粘贴截图";
+                    
+                    // 恢复按钮状态
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    submitBtn.innerText = originalBtnText;
+                }, 'image/webp', 0.8);
             };
-            // V8 Fix: 破损图片防护，补齐 onerror 生命周期防止内存幽灵驻留
+            
             img.onerror = () => {
                 URL.revokeObjectURL(objectUrl);
                 showToast('图片解析失败，请尝试其他文件', 'error');
                 document.getElementById('uploadTip').innerText = "点击或粘贴截图";
+                
+                // 恢复按钮状态
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                submitBtn.innerText = originalBtnText;
             };
             img.src = objectUrl;
         }
@@ -1284,34 +1334,49 @@
         document.getElementById('imageInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (file) processImageFile(file);
+            e.target.value = ''; // 重置 input 状态，允许用户反复选择同一张图
         });
 
+        // 【终极重构】：智能粘贴。只要剪贴板有图片，无论焦点在哪里，都能剥离出图片并唤起/应用到弹窗
         document.addEventListener('paste', (e) => {
-            const addModal = document.getElementById('addModal');
-            const isModalClosed = addModal.classList.contains('opacity-0');
-
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            
+            let hasImage = false;
+            let imageFile = null;
+
             for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-                if (item.kind === 'file' && item.type.startsWith('image/')) {
-                    const file = item.getAsFile();
-                    
-                    if (isModalClosed) {
-                        openAddModal();
-                    }
-                    
-                    processImageFile(file);
-                    showToast('识别到剪贴板图片，已开启新建');
-                    e.preventDefault();
-                    break; 
+                if (items[i].kind === 'file' && items[i].type.startsWith('image/')) {
+                    hasImage = true;
+                    imageFile = items[i].getAsFile();
+                    break;
                 }
             }
+
+            // 如果没图片，彻底放行，让浏览器处理文字粘贴
+            if (!hasImage) return;
+
+            // 防御：如果非【新建/编辑】的弹窗开着，切断拦截防层级暴穿
+            const blockModals = ['settingsModal', 'variableModal', 'imageLightboxModal', 'confirmModal'];
+            const isAnyBlockModalOpen = blockModals.some(id => !document.getElementById(id).classList.contains('opacity-0'));
+            if (isAnyBlockModalOpen) return;
+
+            // 智能唤起并应用
+            const addModal = document.getElementById('addModal');
+            if (addModal.classList.contains('opacity-0')) {
+                openAddModal();
+            }
+            
+            processImageFile(imageFile);
+            showToast('✨ 识别到剪贴板图片，已应用');
+            e.preventDefault(); 
         });
 
         function clearSelectedImage() {
             document.getElementById('imageInput').value = '';
-            currentImageBase64 = null;
+            currentImageData = null;
+            if (window.__previewUrl) {
+                URL.revokeObjectURL(window.__previewUrl);
+                window.__previewUrl = null;
+            }
             document.getElementById('previewWrapper').classList.add('hidden');
             document.getElementById('uploadZone').classList.remove('hidden');
         }
@@ -1331,7 +1396,7 @@
             btn.innerText = '保存中...';
 
             try {
-                let payload = { category, title, content, image: currentImageBase64, timestamp: Date.now() };
+                let payload = { category, title, content, image: currentImageData, timestamp: Date.now() };
 
                 if (currentEditId) {
                     try {
@@ -1381,56 +1446,110 @@
             input.focus();
         }
 
+        // 全量图文物理导出 (JSZip)
         async function exportData() {
             try {
                 const records = await dbOps.getAll();
                 if (records.length === 0) return showToast('暂无数据', 'error');
                 
-                const dataStr = JSON.stringify(records);
-                const blob = new Blob([dataStr], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
+                showToast('📦 正在打包图文全量备份...');
+                
+                const zip = new JSZip();
+                const imgFolder = zip.folder("images");
+                const exportRecords = [];
+                
+                for (const r of records) {
+                    const cloned = { ...r };
+                    if (cloned.image) {
+                        const fileName = `${cloned.id}.webp`;
+                        if (cloned.image instanceof Blob) {
+                            imgFolder.file(fileName, cloned.image);
+                        } else if (typeof cloned.image === 'string' && cloned.image.startsWith('data:image')) {
+                            const base64Data = cloned.image.split(',')[1];
+                            imgFolder.file(fileName, base64Data, {base64: true});
+                        }
+                        cloned._imageFileName = fileName; 
+                        delete cloned.image; 
+                    }
+                    exportRecords.push(cloned);
+                }
+                
+                zip.file("data.json", JSON.stringify(exportRecords, null, 2));
+                
+                const content = await zip.generateAsync({ type: "blob" });
+                const url = URL.createObjectURL(content);
                 
                 const a = document.createElement('a'); a.href = url;
-                a.download = `PromptHub_Backup_${new Date().toISOString().split('T')[0]}.json`;
+                a.download = `PromptHub_FullBackup_${new Date().toISOString().split('T')[0]}.zip`;
                 document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-                showToast('备份已导出');
-            } catch (err) { showToast('导出中止', 'error'); }
+                showToast('✨ 完整图文备份已导出 (.zip)');
+            } catch (err) { 
+                console.error(err);
+                showToast('导出中止，请检查内存或重试', 'error'); 
+            }
         }
 
-        document.getElementById('importInput').addEventListener('change', (e) => {
+        // 全量图文物理导入 (支持 .zip 与 .json)
+        document.getElementById('importInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-                try {
-                    const data = JSON.parse(event.target.result);
-                    if (!Array.isArray(data)) throw new Error("Format error");
-                    
-                    let importedCount = 0;
-                    let localCats = new Set(getCategories());
-                    
-                    for (const item of data) {
-                        if (!item.id) item.id = generateUUID();
-                        if (item.content) {
-                            if (!item.timestamp) item.timestamp = Date.now();
-                            if (item.category) localCats.add(item.category);
-                            await dbOps.put(item); 
-                            importedCount++;
-                        }
-                    }
-                    saveCategories(Array.from(localCats));
-                    
-                    if(importedCount > 0) showToast(`导入成功 (同步 ${importedCount} 条记录)`);
-                    else showToast('文件中未发现有效数据', 'error');
-                    
-                    document.getElementById('importInput').value = ''; 
-                    loadAndRenderList();
-                    closeSettingsModal(); 
-                } catch (err) {
-                    showToast('文件解析失败', 'error');
+            
+            try {
+                let data = null;
+                let zip = null;
+                
+                if (file.name.endsWith('.zip')) {
+                    showToast('📦 正在解析压缩包...');
+                    zip = await JSZip.loadAsync(file);
+                    const jsonFile = zip.file("data.json");
+                    if (!jsonFile) throw new Error("ZIP 中缺失核心的 data.json 骨架");
+                    const jsonStr = await jsonFile.async("string");
+                    data = JSON.parse(jsonStr);
+                } else if (file.name.endsWith('.json')) {
+                    const text = await file.text();
+                    data = JSON.parse(text);
+                } else {
+                    throw new Error("仅支持导入 .zip 或 .json 文件");
                 }
-            };
-            reader.readAsText(file);
+                
+                if (!Array.isArray(data)) throw new Error("JSON 格式无法解析为列表");
+                
+                showToast('🔄 正在恢复图文资产...');
+                let importedCount = 0;
+                let localCats = new Set(getCategories());
+                
+                for (const item of data) {
+                    if (!item.id) item.id = generateUUID();
+                    if (item.content) {
+                        if (!item.timestamp) item.timestamp = Date.now();
+                        if (item.category) localCats.add(item.category);
+                        
+                        if (item._imageFileName && zip) {
+                            const imgEntry = zip.file("images/" + item._imageFileName);
+                            if (imgEntry) {
+                                const blobData = await imgEntry.async("blob");
+                                item.image = new Blob([blobData], { type: "image/webp" });
+                            }
+                            delete item._imageFileName;
+                        }
+                        
+                        await dbOps.put(item); 
+                        importedCount++;
+                    }
+                }
+                saveCategories(Array.from(localCats));
+                
+                if(importedCount > 0) showToast(`✨ 恢复成功 (同步 ${importedCount} 条记录)`);
+                else showToast('备份中未发现有效数据', 'error');
+                
+                document.getElementById('importInput').value = ''; 
+                loadAndRenderList();
+                closeSettingsModal(); 
+            } catch (err) {
+                console.error(err);
+                showToast('备份解析失败: ' + err.message, 'error');
+                document.getElementById('importInput').value = ''; 
+            }
         });
 
         // ==========================================
@@ -1468,10 +1587,12 @@
 
         async function loadAndRenderList() {
             const listContainer = document.getElementById('promptList');
-            const statTotal = document.getElementById('statTotal');
             const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
             
             try {
+                // 清洗上一轮渲染遗留的 Blob URLs 防止内存泄露
+                cleanupBlobUrls();
+
                 let records = await dbOps.getAll();
                 records.sort((a, b) => b.timestamp - a.timestamp);
                 
@@ -1494,8 +1615,9 @@
                     );
                 }
 
-                statTotal.innerText = records.length;
-                window.__promptCache.clear(); // 清空内容快照缓存
+                document.getElementById('statTotal').innerText = records.length;
+
+                window.__promptCache.clear(); 
 
                 if (records.length === 0) {
                     let emptyMsg = '库中暂无数据，请新建或在设置中注入演示数据。';
@@ -1518,15 +1640,25 @@
                     const displayTitle = item.title || item.tag || '未命名片段';
                     const displayCat = item.category || '通用';
                     
-                    // 将核心文本同步置入内存字典
                     window.__promptCache.set(item.id, item.content);
+
+                    // 兼容处理 Blob 对象与旧版 Base64
+                    let imgUrl = '';
+                    if (item.image) {
+                        if (typeof item.image === 'string') {
+                            imgUrl = item.image;
+                        } else if (item.image instanceof Blob) {
+                            imgUrl = URL.createObjectURL(item.image);
+                            window.__blobUrls.push(imgUrl); // 记录以便后续清理
+                        }
+                    }
 
                     return `
                     <div class="masonry-item gradient-border rounded-[20px] overflow-hidden group">
                         <div class="bg-darkCard rounded-[19px] h-full flex flex-col">
-                            ${item.image ? `
+                            ${imgUrl ? `
                                 <div class="relative w-full pt-[50%] overflow-hidden rounded-t-[19px] bg-[#0B0B15]">
-                                    <img src="${item.image}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-zoom-in" onclick="openImageLightbox('${item.image}')">
+                                    <img src="${imgUrl}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-zoom-in" onclick="openImageLightbox('${imgUrl}')">
                                     <div class="absolute inset-0 bg-gradient-to-t from-darkCard via-transparent to-transparent pointer-events-none"></div>
                                 </div>
                             ` : ''}
