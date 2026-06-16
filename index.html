@@ -78,14 +78,6 @@
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
 
-        .masonry { column-count: 1; column-gap: 1rem; }
-        @media (min-width: 640px) { .masonry { column-count: 2; } }
-        @media (min-width: 1024px) { .masonry { column-count: 3; } }
-        @media (min-width: 1280px) { .masonry { column-count: 4; } }
-        @media (min-width: 1536px) { .masonry { column-count: 5; } }
-        
-        .masonry-item { break-inside: avoid-column; margin-bottom: 1rem; display: inline-block; width: 100%; }
-
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -170,11 +162,13 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/5 pb-3">
             <div id="categoryTabs" class="flex gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto pb-1"></div>
             
+            <!-- 极简纯文本计数器 -->
             <div class="text-xs text-gray-500 whitespace-nowrap shrink-0">
                 共 <span id="statTotal" class="text-neonCyan font-bold mx-0.5">0</span> 条
             </div>
         </div>
-        <div id="promptList" class="masonry pb-10"></div>
+        <!-- 【架构修复】：彻底抛弃 column-count 瀑布流，拥抱绝对稳定的 CSS Grid 横向平铺引擎 -->
+        <div id="promptList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-6 items-start pb-10"></div>
     </div>
 
     <!-- ================= 核心表单 Modal ================= -->
@@ -252,7 +246,7 @@
             <div id="variableInputsContainer" class="space-y-4 mb-6 max-h-[60vh] overflow-y-auto no-scrollbar pr-1"></div>
             
             <button onclick="executeVariableCopy()" class="btn-primary flex items-center justify-center gap-2">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                 填充并复制 (Enter)
             </button>
         </div>
@@ -1337,37 +1331,39 @@
             e.target.value = ''; // 重置 input 状态，允许用户反复选择同一张图
         });
 
-        // 【终极重构】：智能粘贴。只要剪贴板有图片，无论焦点在哪里，都能剥离出图片并唤起/应用到弹窗
+        // 弹窗防暴穿机制，防止剪贴板监听导致UI层级错乱
         document.addEventListener('paste', (e) => {
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            let hasImage = false;
-            let imageFile = null;
-
-            for (let i = 0; i < items.length; i++) {
-                if (items[i].kind === 'file' && items[i].type.startsWith('image/')) {
-                    hasImage = true;
-                    imageFile = items[i].getAsFile();
-                    break;
-                }
+            const activeElement = document.activeElement;
+            // 扩大豁免范围：任何输入框、文本域或富文本编辑区，一律放行原生粘贴
+            if (activeElement && (
+                ['INPUT', 'TEXTAREA'].includes(activeElement.tagName) || 
+                activeElement.isContentEditable
+            )) {
+                return; 
             }
 
-            // 如果没图片，彻底放行，让浏览器处理文字粘贴
-            if (!hasImage) return;
-
-            // 防御：如果非【新建/编辑】的弹窗开着，切断拦截防层级暴穿
+            // 防御：如果非新建弹窗处于打开状态，严禁强行唤起新建导致层级混乱
             const blockModals = ['settingsModal', 'variableModal', 'imageLightboxModal', 'confirmModal'];
             const isAnyBlockModalOpen = blockModals.some(id => !document.getElementById(id).classList.contains('opacity-0'));
             if (isAnyBlockModalOpen) return;
 
-            // 智能唤起并应用
-            const addModal = document.getElementById('addModal');
-            if (addModal.classList.contains('opacity-0')) {
-                openAddModal();
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    const file = item.getAsFile();
+                    
+                    const addModal = document.getElementById('addModal');
+                    if (addModal.classList.contains('opacity-0')) {
+                        openAddModal();
+                    }
+                    
+                    processImageFile(file);
+                    showToast('识别到剪贴板图片，已开启新建');
+                    e.preventDefault();
+                    break; 
+                }
             }
-            
-            processImageFile(imageFile);
-            showToast('✨ 识别到剪贴板图片，已应用');
-            e.preventDefault(); 
         });
 
         function clearSelectedImage() {
@@ -1654,7 +1650,7 @@
                     }
 
                     return `
-                    <div class="masonry-item gradient-border rounded-[20px] overflow-hidden group">
+                    <div class="gradient-border rounded-[20px] overflow-hidden group w-full">
                         <div class="bg-darkCard rounded-[19px] h-full flex flex-col">
                             ${imgUrl ? `
                                 <div class="relative w-full pt-[50%] overflow-hidden rounded-t-[19px] bg-[#0B0B15]">
