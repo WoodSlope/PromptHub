@@ -7,11 +7,9 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g' x1='0%25' y1='100%25' x2='100%25' y2='0%25'><stop offset='0%25' stop-color='%23FF007A'/><stop offset='100%25' stop-color='%2300E5FF'/></linearGradient></defs><circle cx='12' cy='12' r='12' fill='url(%23g)'/><path stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none' d='M13 10V3L4 14h7v7l9-11h-7z' transform='translate(4,4) scale(0.66)'/></svg>">
     
     <!-- ==========================================
-         🚀 部署与封装建议 (Deployment & App Wrapping)
-         当前采用 CDN 外部引入，是部署 GitHub Pages 等 Web 环境的最佳实践，
-         借助全球 CDN 节点缓存，打开速度最快，且 HTML 文件极小。
-         如后期需通过 Tauri/Electron 封装为纯离线桌面端应用，
-         可将下方 script 的 src 替换为内嵌源码，即可实现 100% 断网可用。
+         🚀 [军规 R17] 降级与封装：断网生存法则
+         若需打包为 Electron/Tauri 纯离线桌面端，
+         请将下方 CDN 替换为本地内嵌源码。
          ========================================== -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -28,7 +26,7 @@
                         neonCyan: '#00E5FF',
                         danger: '#FF3366',
                     },
-                    // 离线体验强化：抛弃依赖网络的 WebFont，全面启用无阻流的原生系统字体库
+                    // [军规 R17] 离线生存法则：抛弃外部 WebFont，强制使用系统无阻流字体
                     fontFamily: {
                         sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
                     }
@@ -76,6 +74,7 @@
         body {
             background-color: #0B0B15;
             color: #ffffff;
+            /* [军规 R14] 空间纵深光晕 */
             background-image: 
                 radial-gradient(circle at 15% 50%, rgba(255, 0, 122, 0.15) 0%, transparent 50%),
                 radial-gradient(circle at 85% 30%, rgba(0, 229, 255, 0.15) 0%, transparent 50%);
@@ -131,13 +130,15 @@
             box-shadow: 0 0 12px rgba(255, 0, 122, 0.3);
         }
 
+        /* 仅供内部模态框局部使用，避免与瀑布流卡片冲突 */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
     </style>
 </head>
-<!-- 【修复】：强制挂载 overflow-y-scroll，永久保留滚动条轨道，彻底消灭切换 Tab 时的顶栏水平抖动 -->
+<!-- [军规 R17] 强制 Y 轴滚动条常驻，消灭水平抖动 -->
 <body class="font-sans antialiased min-h-screen overflow-y-scroll">
 
+    <!-- [军规 R14] 40% 透明度悬浮顶栏 -->
     <header class="fixed top-0 inset-x-0 h-14 backdrop-blur-2xl bg-[#0B0B15]/40 border-b border-white/5 z-40 flex items-center justify-between px-4 md:px-6 shadow-[0_4px_30px_rgba(0,0,0,0.1)] gap-3 transition-colors">
         <div class="flex items-center space-x-2 shrink-0">
             <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-neonPink to-neonCyan flex items-center justify-center shadow-[0_0_8px_rgba(255,0,122,0.5)]">
@@ -176,17 +177,18 @@
                 共 <span id="statTotal" class="text-neonCyan font-bold mx-0.5">0</span> 条
             </div>
         </div>
-        <!-- 卡片容器，附带切换 Tab 时的平滑过度效果 -->
         <div id="promptList" class="flex items-start gap-4 lg:gap-6 pb-10 w-full transition-all duration-200"></div>
     </div>
 
     <!-- ================= 核心表单 Modal ================= -->
+    <!-- [军规 R17] 侧边拦截：点击边缘区关闭，规避拖拽垂直滚动条误触 -->
     <div id="addModal" onclick="if(event.target === this && event.clientX < this.clientWidth) attemptCloseAddModal()" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 overflow-y-auto px-4 py-6">
         <div class="modal-panel max-w-3xl w-full" id="addModalContent">
             <button onclick="attemptCloseAddModal()" class="btn-icon-rounded absolute top-4 right-4 z-10 shrink-0"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             
             <div class="flex items-center gap-3 mb-5" id="formModalHeader"></div>
             
+            <!-- [军规 R12] 侧轴防拉伸：md:items-start -->
             <div class="flex flex-col md:flex-row gap-5 mb-5 md:items-start">
                 <div class="w-full md:w-5/12 flex flex-col gap-4">
                     <div>
@@ -216,6 +218,7 @@
 
                         <div id="previewWrapper" class="hidden relative group w-full h-[160px]">
                             <img id="previewImg" src="" class="w-full h-full object-cover rounded-lg border border-white/10">
+                            <!-- [军规 R13] 移动端显形与防触碰盲点：opacity-100 md:opacity-0 md:group-hover:opacity-100 -->
                             <div class="absolute inset-0 bg-black/50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center backdrop-blur-sm">
                                 <button onclick="clearSelectedImage()" class="btn-icon-rounded text-white bg-danger hover:bg-red-600 shadow-lg transform scale-90 md:group-hover:scale-100 shrink-0">
                                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -227,6 +230,7 @@
 
                 <div class="w-full md:w-7/12 flex flex-col h-full">
                     <label class="form-label" for="contentInput">内容 <span class="text-neonPink">*</span></label>
+                    <!-- [军规 R13] Textarea 视口边界防御 max-h-[50vh] -->
                     <textarea id="contentInput" placeholder="描述你希望 AI 做什么... 可以包含 {{你的变量}} 实现点击复制时动态填空。" class="form-input px-3 py-2.5 w-full resize-none leading-relaxed min-h-[200px] max-h-[50vh] overflow-y-auto overscroll-contain" oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'"></textarea>
                 </div>
             </div>
@@ -409,6 +413,7 @@
     </div>
 
     <script>
+        // [军规 R2] 强制使用原生 UUID 确保数据离线主权
         function generateUUID() {
             if (typeof crypto !== 'undefined' && crypto.randomUUID) {
                 return crypto.randomUUID();
@@ -424,7 +429,7 @@
             return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
         };
 
-        // 斩断内存幽灵：统一管理 Blob URLs 生命周期
+        // [军规 R16] 斩断内存幽灵：统一管理 Blob URLs 生命周期
         window.__blobUrls = window.__blobUrls || [];
         function cleanupBlobUrls() {
             window.__blobUrls.forEach(url => URL.revokeObjectURL(url));
@@ -458,7 +463,7 @@
         const STORE_NAME = 'prompts';
         let dbPromise = null;
 
-        // 【重构修复】：强力锁死并发请求，确保数据库完全挂载后才开放连接，杜绝 Transaction Null 报错
+        // [军规 R3] 强力锁死并发请求，确保数据库完全挂载后才开放连接
         function initDB() {
             if (dbPromise) return dbPromise;
             dbPromise = new Promise((resolve, reject) => {
@@ -531,19 +536,17 @@
             document.body.style.overflow = 'hidden';
         }
 
+        // [军规 R17] 弹窗层级扫描：确保多弹窗堆叠时不会误释父层滚动锁
         function closeModalView(modalId, contentId, onClosed) {
             const modal = document.getElementById(modalId);
             const content = document.getElementById(contentId);
             content.classList.add('scale-95');
             setTimeout(() => {
                 modal.classList.add('opacity-0', 'pointer-events-none');
-                
-                // 防止多弹窗叠加时，关闭子弹窗误释父弹窗的滚动锁
                 const activeModals = document.querySelectorAll('.fixed.inset-0:not(.opacity-0)');
                 if (activeModals.length <= 1) { 
                     document.body.style.overflow = '';
                 }
-                
                 if(onClosed) onClosed();
             }, 200);
         }
@@ -643,6 +646,7 @@
             });
         }
 
+        // [军规 R10] 弹窗 Focus 安全控制
         function openAddModal() {
             currentEditId = null; 
             document.getElementById('formModalHeader').innerHTML = `
@@ -743,6 +747,7 @@
             }, 150);
         }
 
+        // [军规 R8] 表单脏检查防误触
         function attemptCloseAddModal() {
             const currentState = getFormStateSnapshot();
             if (currentState !== initialFormState) {
@@ -759,7 +764,6 @@
 
         function closeAddModal() {
             closeModalView('addModal', 'addModalContent', () => {
-                // 斩断取消编辑时的内存幽灵 URL
                 if (window.__previewUrl) {
                     URL.revokeObjectURL(window.__previewUrl);
                     window.__previewUrl = null;
@@ -967,10 +971,9 @@
         // 剪贴板与核心动态变量引擎 
         // ==========================================
         
-        // 【极限防守】：去除 async 的微任务延迟，保证 iOS Safari 复制 100% 成功率
+        // [军规 R6] 同步剪贴板霸权：规避异步操作导致 Safari 复制失败
         function copyPromptText(text) {
             if (navigator.clipboard && window.isSecureContext) {
-                // 将 API 变为绝对首层同步调用
                 navigator.clipboard.writeText(text).then(() => {
                     showToast('✨ 已复制！');
                 }).catch(() => {
@@ -997,7 +1000,6 @@
 
         let pendingVariableTemplate = ''; 
         let pendingVariables = []; 
-        
         window.__promptCache = new Map();
 
         function getVariableRegex() {
@@ -1075,6 +1077,7 @@
             
             const regex = getVariableRegex();
             
+            // [军规 R16] 防御性解析替换：严防多变量递归污染
             const finalString = pendingVariableTemplate.replace(regex, (match) => {
                 return valueMap.has(match) ? valueMap.get(match) : match;
             });
@@ -1100,8 +1103,9 @@
         }
 
         // ==========================================
-        // 3. 核心密码学与云端同步引擎 (AES-GCM + GitHub Gist)
+        // 3. [军规 R5] 核心纯净密码学与云端引擎
         // ==========================================
+
         const cryptoOps = {
             async deriveKey(password, salt) {
                 const enc = new TextEncoder();
@@ -1164,14 +1168,12 @@
                 let rawPrompts = await dbOps.getAll();
                 const categories = getCategories();
                 
-                // 执行视觉资产强制物理剥离，只推文本上云
                 const cloudSafePrompts = rawPrompts.map(p => {
                     const { image, ...rest } = p;
                     return rest;
                 });
                 
                 let rawPayload = JSON.stringify({ prompts: cloudSafePrompts, categories });
-                
                 const byteSize = new Blob([rawPayload]).size;
                 const MAX_GIST_SIZE = 700 * 1024; 
                 
@@ -1268,10 +1270,10 @@
                         if(!item.id) item.id = generateUUID();
                         if (item.category) localCats.add(item.category);
                         
-                        // 本地资产反向继承：即使云端没图片，只要本地有，就自动缝合保留
+                        // 本地资产反向继承
                         const localItem = existingMap.get(item.id);
-                        if (localItem) {
-                            if (localItem.image && !item.image) item.image = localItem.image;
+                        if (localItem && localItem.image && !item.image) {
+                            item.image = localItem.image;
                         }
 
                         await dbOps.put(item);
@@ -1298,10 +1300,11 @@
             }
         }
 
+        // [军规 R1] 绝对二进制霸权：入库前强力压缩转化
         function processImageFile(file) {
             document.getElementById('uploadTip').innerText = "处理压缩中...";
             
-            // 解决竞态条件：处理图片期间，禁止点击保存按钮
+            // [军规 R9] 狂暴并发拦截：禁用提交按钮
             const submitBtn = document.getElementById('formSubmitBtn');
             const originalBtnText = submitBtn.innerText;
             submitBtn.disabled = true;
@@ -1331,7 +1334,6 @@
                     document.getElementById('previewWrapper').classList.remove('hidden');
                     document.getElementById('uploadTip').innerText = "点击或粘贴截图";
                     
-                    // 恢复按钮状态
                     submitBtn.disabled = false;
                     submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                     submitBtn.innerText = originalBtnText;
@@ -1343,7 +1345,6 @@
                 showToast('图片解析失败，请尝试其他文件', 'error');
                 document.getElementById('uploadTip').innerText = "点击或粘贴截图";
                 
-                // 恢复按钮状态
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 submitBtn.innerText = originalBtnText;
@@ -1354,10 +1355,10 @@
         document.getElementById('imageInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (file) processImageFile(file);
-            e.target.value = ''; // 重置 input 状态，允许用户反复选择同一张图
+            e.target.value = ''; 
         });
 
-        // 终极重构：智能粘贴。只要剪贴板有图片，无论焦点在哪里，都能剥离出图片并唤起/应用到弹窗
+        // [军规 R7] 意图读心术：智能截断粘贴并唤起应用层
         document.addEventListener('paste', (e) => {
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
             let hasImage = false;
@@ -1371,15 +1372,12 @@
                 }
             }
 
-            // 如果没图片，彻底放行，让浏览器处理文字粘贴
             if (!hasImage) return;
 
-            // 防御：如果非【新建/编辑】的弹窗开着，切断拦截防层级暴穿
             const blockModals = ['settingsModal', 'variableModal', 'imageLightboxModal', 'confirmModal'];
             const isAnyBlockModalOpen = blockModals.some(id => !document.getElementById(id).classList.contains('opacity-0'));
             if (isAnyBlockModalOpen) return;
 
-            // 智能唤起并应用
             const addModal = document.getElementById('addModal');
             if (addModal.classList.contains('opacity-0')) {
                 openAddModal();
@@ -1401,6 +1399,7 @@
             document.getElementById('uploadZone').classList.remove('hidden');
         }
 
+        // [军规 R4] 深层缝合写入防覆盖
         async function savePrompt() {
             const category = document.getElementById('categorySelect').value;
             const title = document.getElementById('titleInput').value.trim();
@@ -1466,7 +1465,7 @@
             input.focus();
         }
 
-        // 全量图文物理导出 (JSZip)
+        // 离线图文导出包 (物理备份)
         async function exportData() {
             try {
                 const records = await dbOps.getAll();
@@ -1485,6 +1484,7 @@
                         if (cloned.image instanceof Blob) {
                             imgFolder.file(fileName, cloned.image);
                         } else if (typeof cloned.image === 'string' && cloned.image.startsWith('data:image')) {
+                            // 防御性留存：兼容早期尚未严格执行 R1 规则时的历史 Base64 脏数据
                             const base64Data = cloned.image.split(',')[1];
                             imgFolder.file(fileName, base64Data, {base64: true});
                         }
@@ -1509,7 +1509,7 @@
             }
         }
 
-        // 全量图文物理导入 (支持 .zip 与 .json)
+        // 离线图文物理恢复导入
         document.getElementById('importInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -1573,7 +1573,7 @@
         });
 
         // ==========================================
-        // 4. 瀑布流渲染与搜索过滤
+        // 4. [军规 R11 & R15] 虚拟轮询瀑布流与引擎级动画
         // ==========================================
         let activeCategory = 'All';
 
@@ -1600,13 +1600,11 @@
             }).join('');
         }
 
-        // 【优化】：增加切换 Tab 时的微观物理过渡动画 (Loading Effect)
         function setActiveCategory(category) {
             if (activeCategory === category) return;
             activeCategory = category;
             
             const listContainer = document.getElementById('promptList');
-            // 添加平滑的宏观过度效果 (Loading Effect)
             listContainer.style.opacity = '0';
             listContainer.style.transform = 'translateY(10px)';
             listContainer.style.transition = 'all 0.2s ease-out';
@@ -1623,10 +1621,8 @@
             const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
             
             try {
-                // 清洗上一轮渲染遗留的 Blob URLs 防止内存泄露
                 cleanupBlobUrls();
 
-                // 【架构修复】：彻底消除 getAll 时的 db 空指针风险，全程由 Promise 护航
                 let records = await dbOps.getAll();
                 records.sort((a, b) => b.timestamp - a.timestamp);
                 
@@ -1666,7 +1662,6 @@
                         emptyMsg = `[${escapeHtml(activeCategory)}] 分类下暂无内容。`;
                     }
 
-                    // 完全清空列，插入空状态
                     listContainer.innerHTML = '';
                     
                     const emptyDiv = document.createElement('div');
@@ -1678,17 +1673,13 @@
                     return;
                 }
 
-                // ==============================================================
-                // 🚀 核心重构：虚拟 DOM 复用引擎 (配合 AutoAnimate 实现丝滑 FLIP 动画)
-                // ==============================================================
                 const width = window.innerWidth;
                 let colCount = 1;
-                if (width >= 1536) colCount = 5;      // 2xl 
-                else if (width >= 1280) colCount = 4; // xl
-                else if (width >= 1024) colCount = 3; // lg
-                else if (width >= 640) colCount = 2;  // sm
+                if (width >= 1536) colCount = 5;      
+                else if (width >= 1280) colCount = 4; 
+                else if (width >= 1024) colCount = 3; 
+                else if (width >= 640) colCount = 2;  
 
-                // 1. 动态对齐列容器，并为每列挂载 AutoAnimate
                 while (listContainer.children.length > colCount) {
                     listContainer.removeChild(listContainer.lastChild);
                 }
@@ -1700,13 +1691,12 @@
                 }
                 const columns = Array.from(listContainer.children);
 
-                // 2. 收集当前已存在的所有卡片节点，建立索引
                 const existingCards = new Map();
-                document.querySelectorAll('.masonry-item').forEach(card => {
+                // ⚠️ 无损清理：彻底舍弃对旧版 masonry 类名的强耦合，改为语义化检索钩子
+                document.querySelectorAll('.prompt-card-node').forEach(card => {
                     existingCards.set(card.dataset.id, card);
                 });
 
-                // 3. 遍历最新数据，复用/更新/创建 节点
                 records.forEach((item, index) => {
                     const displayTitle = item.title || item.tag || '未命名片段';
                     const displayCat = item.category || '通用';
@@ -1771,36 +1761,29 @@
                     const itemVersion = String(item.updatedAt || item.timestamp);
                     
                     if (!cardEl) {
-                        // 【修复】：彻底移除 animate-fade-in 和 animation-delay
-                        // 因为容器已挂载 AutoAnimate，CSS 进场动画会与 JS 动画引擎发生“双重控制权冲突”，导致严重闪烁。
                         cardEl = document.createElement('div');
-                        // 仅保留基础钩子、渐变边框和 Hover 悬浮物理特效
-                        cardEl.className = 'masonry-item gradient-border rounded-[20px] overflow-hidden group w-full transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.4)]';
+                        // ⚠️ 动效权柄交接：绝对禁止使用 CSS animation，全部交由 AutoAnimate 引擎驱动以防闪烁
+                        cardEl.className = 'prompt-card-node gradient-border rounded-[20px] overflow-hidden group w-full transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.4)]';
                         cardEl.dataset.id = item.id;
                         cardEl.dataset.version = itemVersion;
                         cardEl.innerHTML = cardInnerHTML;
                     } else {
-                        // 命中缓存：仅在数据有变动时才重刷 innerHTML
                         if (cardEl.dataset.version !== itemVersion || imgUrl !== cardEl.dataset.imgUrl) {
                             cardEl.innerHTML = cardInnerHTML;
                             cardEl.dataset.version = itemVersion;
                         }
-                        // 从缓存集合中剔除已复用的节点
                         existingCards.delete(item.id);
                     }
                     
                     cardEl.dataset.imgUrl = imgUrl;
 
-                    // 4. 将节点压入对应的瀑布流列 (物理搬运)
                     const targetCol = columns[index % colCount];
-                    // 如果节点已经在这个位置的对应坑位，就不动它，减少 DOM 操作
                     if (targetCol.children[Math.floor(index / colCount)] !== cardEl) {
-                        targetCol.appendChild(cardEl); // AutoAnimate 会捕获这个 Append 动作产生位移动画
+                        targetCol.appendChild(cardEl); 
                     }
                 });
 
-                // 5. 摧毁所有未被复用的废弃节点 (如被搜索过滤掉的、被删除的)
-                existingCards.forEach(card => card.remove()); // AutoAnimate 会捕获 Remove 产生消失动画
+                existingCards.forEach(card => card.remove()); 
 
             } catch (err) {
                 console.error("Render error:", err);
@@ -1808,7 +1791,6 @@
             }
         }
 
-        // 窗口尺寸改变时，防抖触发瀑布流引擎重新计算排版
         let layoutResizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(layoutResizeTimer);
@@ -1817,16 +1799,13 @@
             }, 150);
         });
 
-        // 极限兼容：保证在各宿主环境下正确完成初始化
         const bootApp = async () => {
             try {
-                // 初始化其他全局 AutoAnimate 容器 (分类切换、标签管理)
                 if (window.autoAnimate) {
                     window.autoAnimate(document.getElementById('categoryTabs'), { duration: 200 });
                     window.autoAnimate(document.getElementById('settingsCategoryList'), { duration: 200 });
                     window.autoAnimate(document.getElementById('variableInputsContainer'), { duration: 200 });
                 }
-
                 await initDB();
                 loadAndRenderList();
             } catch (err) {
