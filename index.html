@@ -87,14 +87,6 @@
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
 
-        .masonry { column-count: 1; column-gap: 1rem; }
-        @media (min-width: 640px) { .masonry { column-count: 2; } }
-        @media (min-width: 1024px) { .masonry { column-count: 3; } }
-        @media (min-width: 1280px) { .masonry { column-count: 4; } }
-        @media (min-width: 1536px) { .masonry { column-count: 5; } }
-        
-        .masonry-item { break-inside: avoid-column; margin-bottom: 1rem; display: inline-block; width: 100%; }
-
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -140,10 +132,11 @@
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.2s ease-out forwards; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
     </style>
 </head>
-<body class="font-sans antialiased min-h-screen">
+<!-- 【修复】：强制挂载 overflow-y-scroll，永久保留滚动条轨道，彻底消灭切换 Tab 时的顶栏水平抖动 -->
+<body class="font-sans antialiased min-h-screen overflow-y-scroll">
 
     <header class="fixed top-0 inset-x-0 h-14 backdrop-blur-2xl bg-[#0B0B15]/40 border-b border-white/5 z-40 flex items-center justify-between px-4 md:px-6 shadow-[0_4px_30px_rgba(0,0,0,0.1)] gap-3 transition-colors">
         <div class="flex items-center space-x-2 shrink-0">
@@ -183,7 +176,8 @@
                 共 <span id="statTotal" class="text-neonCyan font-bold mx-0.5">0</span> 条
             </div>
         </div>
-        <div id="promptList" class="flex items-start gap-4 lg:gap-6 pb-10 w-full"></div>
+        <!-- 卡片容器，附带切换 Tab 时的平滑过度效果 -->
+        <div id="promptList" class="flex items-start gap-4 lg:gap-6 pb-10 w-full transition-all duration-200"></div>
     </div>
 
     <!-- ================= 核心表单 Modal ================= -->
@@ -1108,7 +1102,6 @@
         // ==========================================
         // 3. 核心密码学与云端同步引擎 (AES-GCM + GitHub Gist)
         // ==========================================
-
         const cryptoOps = {
             async deriveKey(password, salt) {
                 const enc = new TextEncoder();
@@ -1607,9 +1600,22 @@
             }).join('');
         }
 
+        // 【优化】：增加切换 Tab 时的微观物理过渡动画 (Loading Effect)
         function setActiveCategory(category) {
+            if (activeCategory === category) return;
             activeCategory = category;
-            loadAndRenderList();
+            
+            const listContainer = document.getElementById('promptList');
+            // 添加平滑的宏观过度效果 (Loading Effect)
+            listContainer.style.opacity = '0';
+            listContainer.style.transform = 'translateY(10px)';
+            listContainer.style.transition = 'all 0.2s ease-out';
+            
+            setTimeout(async () => {
+                await loadAndRenderList();
+                listContainer.style.opacity = '1';
+                listContainer.style.transform = 'translateY(0)';
+            }, 150);
         }
 
         async function loadAndRenderList() {
@@ -1765,12 +1771,14 @@
                     const itemVersion = String(item.updatedAt || item.timestamp);
                     
                     if (!cardEl) {
-                        // 创建新卡片，不再强行加动画类，交给 AutoAnimate 处理
+                        // 【修复】：补齐遗失的悬浮与错落进场的视觉特性
                         cardEl = document.createElement('div');
-                        cardEl.className = 'masonry-item gradient-border rounded-[20px] overflow-hidden group w-full';
+                        // 移除已失效的 .masonry-item 相关 CSS 依赖，仅将其作为检索用的钩子类名
+                        cardEl.className = 'masonry-item gradient-border rounded-[20px] overflow-hidden group w-full transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.4)] animate-fade-in';
                         cardEl.dataset.id = item.id;
                         cardEl.dataset.version = itemVersion;
                         cardEl.innerHTML = cardInnerHTML;
+                        cardEl.style.animationDelay = `${Math.min((index % 10) * 30, 300)}ms`;
                     } else {
                         // 命中缓存：仅在数据有变动时才重刷 innerHTML
                         if (cardEl.dataset.version !== itemVersion || imgUrl !== cardEl.dataset.imgUrl) {
