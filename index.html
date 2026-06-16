@@ -1771,14 +1771,14 @@
                     const itemVersion = String(item.updatedAt || item.timestamp);
                     
                     if (!cardEl) {
-                        // 【修复】：补齐遗失的悬浮与错落进场的视觉特性
+                        // 【修复】：彻底移除 animate-fade-in 和 animation-delay
+                        // 因为容器已挂载 AutoAnimate，CSS 进场动画会与 JS 动画引擎发生“双重控制权冲突”，导致严重闪烁。
                         cardEl = document.createElement('div');
-                        // 移除已失效的 .masonry-item 相关 CSS 依赖，仅将其作为检索用的钩子类名
-                        cardEl.className = 'masonry-item gradient-border rounded-[20px] overflow-hidden group w-full transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.4)] animate-fade-in';
+                        // 仅保留基础钩子、渐变边框和 Hover 悬浮物理特效
+                        cardEl.className = 'masonry-item gradient-border rounded-[20px] overflow-hidden group w-full transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.4)]';
                         cardEl.dataset.id = item.id;
                         cardEl.dataset.version = itemVersion;
                         cardEl.innerHTML = cardInnerHTML;
-                        cardEl.style.animationDelay = `${Math.min((index % 10) * 30, 300)}ms`;
                     } else {
                         // 命中缓存：仅在数据有变动时才重刷 innerHTML
                         if (cardEl.dataset.version !== itemVersion || imgUrl !== cardEl.dataset.imgUrl) {
